@@ -6,13 +6,13 @@ import siteConfig from '../data/site-config';
 const navLinks = siteConfig.headerNavLinks ?? [];
 ---
 
-<nav class="relative min-h-10 pt-4 pb-12 sm:min-h-14 sm:pb-24 md:pt-8" aria-label="Primary navigation">
+<nav class="relative min-h-10 pt-4 pb-12 sm:min-h-14 sm:pb-24 md:pt-8" aria-label="主导航">
     {
         navLinks.length > 0 && (
             <div class="relative mx-auto w-full max-w-3xl">
                 <button
                     class="menu-toggle relative z-30 -ml-1 flex h-8 w-8 cursor-pointer items-center justify-center md:hidden"
-                    aria-label="Open Menu"
+                    aria-label="打开菜单"
                     aria-expanded="false"
                     aria-controls="menu-items"
                 >
@@ -98,7 +98,7 @@ const navLinks = siteConfig.headerNavLinks ?? [];
             const isMenuExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
             menuToggleBtn.classList.toggle('is-active');
             menuToggleBtn.setAttribute('aria-expanded', isMenuExpanded ? 'false' : 'true');
-            menuToggleBtn.setAttribute('aria-label', isMenuExpanded ? 'Open Menu' : 'Close Menu');
+            menuToggleBtn.setAttribute('aria-label', isMenuExpanded ? '打开菜单' : '关闭菜单');
             menu?.classList.toggle('is-visible');
         });
     }

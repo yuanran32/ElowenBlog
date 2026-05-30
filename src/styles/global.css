@@ -92,6 +92,18 @@ html.dark {
         @apply font-medium;
     }
 
+    .prose :where(:not(pre) > code) {
+        @apply bg-muted rounded px-1 py-0.5 text-[0.9em];
+    }
+
+    .prose pre {
+        @apply border-main bg-muted rounded-none border border-dashed p-4 text-sm leading-relaxed;
+    }
+
+    .prose pre code {
+        @apply bg-transparent p-0 text-[inherit] font-normal;
+    }
+
     .prose blockquote {
         @apply font-serif font-normal italic border-none pl-0 text-[1.375em] leading-snug sm:text-[1.66667em];
     }

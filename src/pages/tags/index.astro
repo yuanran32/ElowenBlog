@@ -3,9 +3,10 @@ import { getCollection } from 'astro:content';
 import ArrowRight from '../../assets/icons/arrow-right.svg';
 import Subscribe from '../../components/Subscribe.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
+import { withBase } from '../../utils/common-utils';
+import { filterPublishedPosts, getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = filterPublishedPosts(await getCollection('blog')).sort(sortItemsByDateDesc);
 const tags = getAllTags(posts).sort((tagA, tagB) => {
     const postCountTagA = getPostsByTag(posts, tagA.id).length;
     const postCountTagB = getPostsByTag(posts, tagB.id).length;
@@ -23,7 +24,7 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
         tags.map((tag) => {
             const postCount = getPostsByTag(posts, tag.id).length;
             return (
-                <a class="group mb-10 flex items-start justify-between gap-8 sm:mb-12" href={`/tags/${tag.id}`}>
+                <a class="group mb-10 flex items-start justify-between gap-8 sm:mb-12" href={withBase(`/tags/${tag.id}/`)}>
                     <div class="grow">
                         <h2 class="font-serif text-xl leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-2xl">
                             {tag.name}

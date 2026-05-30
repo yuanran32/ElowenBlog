@@ -3,6 +3,7 @@ title: 第一篇博客
 excerpt: 这里是博客摘要，可以简单说明这篇文章要记录什么内容。
 publishDate: '2026-05-30'
 isFeatured: true
+series: 博客建设
 tags:
   - 随笔
   - 技术

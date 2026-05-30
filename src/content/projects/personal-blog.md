@@ -3,7 +3,19 @@ title: 个人博客
 description: 基于 Astro 搭建的个人博客，用于记录技术学习、项目实践和个人简历。
 publishDate: '2026-05-30'
 isFeatured: true
+techStack:
+  - Astro
+  - Tailwind CSS
+  - TypeScript
+  - Markdown
+demoUrl: 'https://yuanran32.github.io/myBlog/'
 githubUrl: 'https://github.com/yuanran32/myBlog'
+role: 独立开发
+highlights:
+  - 支持 Markdown / MDX 内容管理
+  - 配置 RSS、站点地图和基础 SEO
+  - 适配 GitHub Pages 项目页部署路径
+  - 支持文章、项目、标签和简历页面
 seo:
   title: 个人博客项目
   description: 基于 Astro 和 Markdown 的个人博客项目，用于展示文章、项目和简历。

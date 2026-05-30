@@ -1,5 +1,6 @@
 ---
 import siteConfig from '../data/site-config';
+import { withBase } from '../utils/common-utils';
 
 const socialLinks = siteConfig.socialLinks ?? [];
 const navLinks = siteConfig.footerNavLinks ?? [];
@@ -9,9 +10,9 @@ const currentYear = new Date().getFullYear();
 <footer class="mx-auto w-full max-w-3xl pt-12 pb-10 sm:pt-24 sm:pb-14">
     {
         navLinks.length > 0 && (
-            <nav class="mb-4 flex flex-wrap gap-x-6 gap-y-1" aria-label="Footer navigation">
+            <nav class="mb-4 flex flex-wrap gap-x-6 gap-y-1" aria-label="页脚导航">
                 {navLinks.map((link) => (
-                    <a class="font-serif hover:underline hover:underline-offset-2" href={link.href}>
+                    <a class="font-serif hover:underline hover:underline-offset-2" href={withBase(link.href)}>
                         {link.text}
                     </a>
                 ))}
@@ -32,7 +33,7 @@ const currentYear = new Date().getFullYear();
                             class="inline-flex items-center justify-center text-sm hover:underline hover:underline-offset-2"
                             href={link.href}
                             target="_blank"
-                            rel="noopener noreferer"
+                            rel="noopener noreferrer"
                         >
                             {link.text}
                         </a>
@@ -42,7 +43,7 @@ const currentYear = new Date().getFullYear();
         }
         <p class="text-sm">
             &copy; {currentYear}
-            <a class="hover:underline hover:underline-offset-2" href="/">{siteConfig.title}</a>. All rights reserved.
+            <a class="hover:underline hover:underline-offset-2" href={withBase('/')}>{siteConfig.title}</a>. 保留所有权利。
         </p>
     </div>
 </footer>

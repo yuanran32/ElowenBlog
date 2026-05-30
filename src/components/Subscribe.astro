@@ -29,7 +29,7 @@ if (!subscribe?.enabled || !subscribe?.form?.action) {
             autocomplete="email"
             placeholder="name@example.com"
             class="text-main border-main placeholder:text-main/60 h-9 w-full rounded-full border bg-transparent px-5 py-2 text-sm focus:outline-hidden"
-            aria-label="Email address"
+            aria-label="邮箱地址"
         />
         {subscribe.form.hiddenFields?.map((field) => <input type="hidden" name={field.name} value={field.value} />)}
         {
@@ -39,6 +39,6 @@ if (!subscribe?.enabled || !subscribe?.form?.action) {
                 </div>
             )
         }
-        <Button type="submit" class="h-9 w-full sm:w-auto">Subscribe</Button>
+        <Button type="submit" class="h-9 w-full sm:w-auto">订阅</Button>
     </form>
 </section>

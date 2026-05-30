@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
+import Button from '../../components/Button.astro';
 import ProjectPreview from '../../components/ProjectPreview.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
@@ -24,7 +25,7 @@ type Props = {
 };
 
 const { project, prevProject, nextProject } = Astro.props;
-const { title, description, seo } = project.data;
+const { title, description, techStack = [], demoUrl, githubUrl, role, highlights = [], seo } = project.data;
 const { Content } = await render(project);
 ---
 
@@ -32,7 +33,52 @@ const { Content } = await render(project);
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
             <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+            {description && <p class="mt-4 text-base leading-relaxed sm:text-lg">{description}</p>}
         </header>
+        {
+            (role || techStack.length > 0 || demoUrl || githubUrl || highlights.length > 0) && (
+                <section class="border-main bg-muted mb-10 border border-dashed px-5 py-5">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        {role && (
+                            <div>
+                                <h2 class="mb-2 font-serif text-lg italic">我的角色</h2>
+                                <p class="text-sm leading-relaxed">{role}</p>
+                            </div>
+                        )}
+                        {techStack.length > 0 && (
+                            <div>
+                                <h2 class="mb-2 font-serif text-lg italic">技术栈</h2>
+                                <div class="flex flex-wrap gap-2">
+                                    {techStack.map((tech) => (
+                                        <span class="border-main rounded-full border bg-main px-2.5 py-0.5 text-xs">{tech}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {
+                        highlights.length > 0 && (
+                            <div class="mt-5">
+                                <h2 class="mb-2 font-serif text-lg italic">项目亮点</h2>
+                                <ul class="grid gap-2 text-sm leading-relaxed sm:grid-cols-2">
+                                    {highlights.map((highlight) => (
+                                        <li>{highlight}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    }
+                    {
+                        (demoUrl || githubUrl) && (
+                            <div class="mt-6 flex flex-wrap gap-3">
+                                {demoUrl && <Button href={demoUrl}>在线预览</Button>}
+                                {githubUrl && <Button href={githubUrl}>查看源码</Button>}
+                            </div>
+                        )
+                    }
+                </section>
+            )
+        }
         <div class="prose sm:prose-lg max-w-none">
             <Content />
         </div>
@@ -40,7 +86,7 @@ const { Content } = await render(project);
     {
         (prevProject || nextProject) && (
             <div class="my-16 sm:my-24">
-                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">View Next</h2>
+                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">继续查看</h2>
                 {nextProject && <ProjectPreview project={nextProject} class="mb-10 sm:mb-12" headingLevel="h3" />}
                 {prevProject && <ProjectPreview project={prevProject} class="mb-10 sm:mb-12" headingLevel="h3" />}
             </div>

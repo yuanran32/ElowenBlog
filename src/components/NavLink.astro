@@ -1,14 +1,18 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
+import { withBase } from '../utils/common-utils';
 
 type Props = HTMLAttributes<'a'>;
 
 const { href, class: className, ...props } = Astro.props;
 
 const { pathname } = Astro.url;
-const isActive = href === pathname || href === pathname.replace(/\/$/, '');
+const resolvedHref = href ? withBase(href) : undefined;
+const resolvedPathname = resolvedHref ? new URL(resolvedHref, Astro.site).pathname : '';
+const normalizePath = (path: string) => path.replace(/\/$/, '') || '/';
+const isActive = normalizePath(resolvedPathname) === normalizePath(pathname);
 ---
 
-<a class:list={[className, { 'underline decoration-1 underline-offset-2': isActive }]} href={href} {...props}>
+<a class:list={[className, { 'underline decoration-1 underline-offset-2': isActive }]} href={resolvedHref} {...props}>
     <slot />
 </a>

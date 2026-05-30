@@ -6,26 +6,33 @@ import PostPreview from '../components/PostPreview.astro';
 import ProjectPreview from '../components/ProjectPreview.astro';
 import siteConfig from '../data/site-config';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { sortItemsByDateDesc } from '../utils/data-utils';
+import { filterPublishedPosts, sortItemsByDateDesc } from '../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = filterPublishedPosts(await getCollection('blog')).sort(sortItemsByDateDesc);
 const featuredPosts = posts.filter(({ data }) => data.isFeatured);
 
 const projects = (await getCollection('projects')).sort(sortItemsByDateDesc);
 const featuredProjects = projects.filter(({ data }) => data.isFeatured);
+const focusAreas = ['前端开发', 'Web 工程化', '前端测试', '全栈应用', '数据可视化'];
 ---
 
 <BaseLayout description={siteConfig.description}>
     <Hero {...siteConfig.hero} />
+    <section class="mb-16 sm:mb-24">
+        <h2 class="mb-6 font-serif text-xl italic sm:text-2xl">当前关注</h2>
+        <div class="flex flex-wrap gap-3">
+            {focusAreas.map((area) => <span class="border-main bg-muted rounded-full border px-4 py-1.5 text-sm">{area}</span>)}
+        </div>
+    </section>
     {
         featuredProjects?.length > 0 && (
             <div class="mb-16 sm:mb-24">
-                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">Projects</h2>
+                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">精选项目</h2>
                 {featuredProjects.map((project) => (
                     <ProjectPreview project={project} class="mb-10 sm:mb-12" headingLevel="h3" />
                 ))}
                 <div class="mt-12 sm:mt-16">
-                    <Button href="/projects">View All Projects</Button>
+                    <Button href="/projects/">查看全部项目</Button>
                 </div>
             </div>
         )
@@ -33,12 +40,12 @@ const featuredProjects = projects.filter(({ data }) => data.isFeatured);
     {
         featuredPosts?.length > 0 && (
             <div class="mb-16 sm:mb-24">
-                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">Writing</h2>
+                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">近期文章</h2>
                 {featuredPosts.map((post) => (
                     <PostPreview post={post} class="mb-10 sm:mb-12" headingLevel="h3" />
                 ))}
                 <div class="mt-12 sm:mt-16">
-                    <Button href="/blog">View All Posts</Button>
+                    <Button href="/blog/">查看全部文章</Button>
                 </div>
             </div>
         )

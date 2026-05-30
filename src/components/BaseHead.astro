@@ -4,6 +4,7 @@ import newsreaderWoff2 from '@fontsource-variable/newsreader/files/newsreader-la
 import { getImage } from 'astro:assets';
 import siteConfig from '../data/site-config';
 import type { ImageInput } from '../types';
+import { withBase } from '../utils/common-utils';
 
 import '../styles/global.css';
 
@@ -48,7 +49,7 @@ function formatCanonicalURL(url: string | URL) {
     const hasQueryParams = path.includes('?');
     // If there are query params, make sure the URL has no trailing slash
     if (hasQueryParams) {
-        path.replace(/\/?$/, '');
+        return path.replace(/\/?$/, '');
     }
     // otherwise, canonical URL always has a trailing slash
     return path.replace(/\/?$/, hasQueryParams ? '' : '/');
@@ -66,9 +67,9 @@ function formatCanonicalURL(url: string | URL) {
 <link rel="preload" as="font" type="font/woff2" href={newsreaderWoff2} crossorigin="anonymous" />
 
 <!-- Low Priority Global Metadata -->
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="sitemap" href="/sitemap-index.xml" />
-<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS" />
+<link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+<link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+<link rel="alternate" type="application/rss+xml" href={withBase('/rss.xml')} title="RSS" />
 
 <!-- Page Metadata -->
 <link rel="canonical" href={formatCanonicalURL(canonicalURL)} />
