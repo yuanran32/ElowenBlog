@@ -10,7 +10,7 @@ seo:
 ## 联系方式
 
 - GitHub：[yuanran32](https://github.com/yuanran32)
-- 邮箱：暂未公开
+- 邮箱：3916048194@qq.com
 
 ## 说明
 

@@ -3,6 +3,7 @@ title: 个人博客
 description: 基于 Astro 搭建的个人博客，用于记录技术学习、项目实践和个人简历。
 publishDate: '2026-05-30'
 isFeatured: true
+githubUrl: 'https://github.com/yuanran32/myBlog'
 seo:
   title: 个人博客项目
   description: 基于 Astro 和 Markdown 的个人博客项目，用于展示文章、项目和简历。

@@ -8,13 +8,13 @@ seo:
 ## 个人信息
 
 姓名：Elowen  
-邮箱：暂未公开  
-GitHub：https://github.com/yuanran32  
-博客：https://yuanran32.github.io/myBlog
+邮箱：3916048194@qq.com  
+GitHub：https://github.com/yuanran32   
+博客：https://yuanran32.github.io/myBlog  
 
 ## 求职方向
 
-前端开发 / 全栈开发 / 后端开发
+前端开发 / 全栈开发
 
 ## 技术栈
 

@@ -1,5 +1,4 @@
 import avatar from '../assets/images/avatar.png';
-import hero from '../assets/images/hero.jpg';
 import type { SiteConfig } from '../types';
 
 const siteConfig: SiteConfig = {
@@ -64,13 +63,9 @@ const siteConfig: SiteConfig = {
     hero: {
         title: 'Elowen的技术小站',
         text: '欢迎来到我的个人博客。这里会记录我的技术学习、项目实践、问题复盘和一些阶段性的思考。\n\n我目前关注前端开发、Web 工程化和全栈应用开发，也会持续整理学习过程中遇到的知识点和实践经验。\n\n你可以在 [GitHub](https://github.com/yuanran32) 查看我的项目，也可以通过联系页面找到我。',
-        // image: {
-        //     src: hero,
-        //     alt: '个人博客首页配图'
-        // },
         actions: [
             {
-                text: '联系我',
+                text: 'Contact',
                 href: '/contact'
             }
         ]
