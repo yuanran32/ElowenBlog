@@ -1,0 +1,9 @@
+# Generated artifacts
+.astro/
+dist/
+
+# Dependencies
+node_modules/
+
+# Lockfiles are maintained by pnpm and are noisy in Prettier checks
+pnpm-lock.yaml

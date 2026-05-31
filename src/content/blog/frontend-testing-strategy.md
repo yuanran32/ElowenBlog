@@ -98,30 +98,15 @@ import { canEditPost } from './permission';
 
 describe('canEditPost', () => {
   it('allows admin to edit any post', () => {
-    expect(
-      canEditPost(
-        { id: 'u1', role: 'admin' },
-        { authorId: 'u2', status: 'published' },
-      ),
-    ).toBe(true);
+    expect(canEditPost({ id: 'u1', role: 'admin' }, { authorId: 'u2', status: 'published' })).toBe(true);
   });
 
   it('prevents editor from editing published post', () => {
-    expect(
-      canEditPost(
-        { id: 'u1', role: 'editor' },
-        { authorId: 'u1', status: 'published' },
-      ),
-    ).toBe(false);
+    expect(canEditPost({ id: 'u1', role: 'editor' }, { authorId: 'u1', status: 'published' })).toBe(false);
   });
 
   it('allows editor to edit own draft', () => {
-    expect(
-      canEditPost(
-        { id: 'u1', role: 'editor' },
-        { authorId: 'u1', status: 'draft' },
-      ),
-    ).toBe(true);
+    expect(canEditPost({ id: 'u1', role: 'editor' }, { authorId: 'u1', status: 'draft' })).toBe(true);
   });
 });
 ```
@@ -261,11 +246,7 @@ test('user can publish a post', async ({ page }) => {
 这些适合单测。
 
 ```ts
-export function validatePost(input: {
-  title: string;
-  content: string;
-  tags: string[];
-}) {
+export function validatePost(input: { title: string; content: string; tags: string[] }) {
   if (!input.title.trim()) return '标题不能为空';
   if (input.content.trim().length < 20) return '正文不能少于 20 个字';
   if (input.tags.length > 5) return '标签不能超过 5 个';
@@ -331,11 +312,11 @@ it('shows error message when title is empty', async () => {
 
 ## 一个简单的分工表
 
-| 类型 | 主要测试目标 | 优点 | 缺点 | 适合例子 |
-| --- | --- | --- | --- | --- |
-| 单测 | 纯逻辑是否正确 | 快、稳定、便宜 | 不覆盖真实 UI | 权限判断、表单校验、数据转换 |
-| 组件测试 | 单个组件的交互是否正确 | 接近用户行为，反馈较快 | 需要 mock 上下文和接口 | 表单、弹窗、列表、筛选器 |
-| E2E | 完整业务流程是否跑通 | 最接近真实用户 | 慢、贵、容易受环境影响 | 登录、下单、发布、后台核心流程 |
+| 类型     | 主要测试目标           | 优点                   | 缺点                   | 适合例子                       |
+| -------- | ---------------------- | ---------------------- | ---------------------- | ------------------------------ |
+| 单测     | 纯逻辑是否正确         | 快、稳定、便宜         | 不覆盖真实 UI          | 权限判断、表单校验、数据转换   |
+| 组件测试 | 单个组件的交互是否正确 | 接近用户行为，反馈较快 | 需要 mock 上下文和接口 | 表单、弹窗、列表、筛选器       |
+| E2E      | 完整业务流程是否跑通   | 最接近真实用户         | 慢、贵、容易受环境影响 | 登录、下单、发布、后台核心流程 |
 
 我自己的实践倾向是：
 

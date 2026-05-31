@@ -1,0 +1,39 @@
+---
+import type { GetStaticPathsOptions, Page } from 'astro';
+import { type CollectionEntry } from 'astro:content';
+import Pagination from '../../../components/Pagination.astro';
+import PostPreview from '../../../components/PostPreview.astro';
+import Subscribe from '../../../components/Subscribe.astro';
+import siteConfig from '../../../data/site-config';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPublishedBlogPosts, getPostsBySeries, getSeriesIndex } from '../../../utils/data-utils';
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+    const posts = await getPublishedBlogPosts();
+    const seriesList = getSeriesIndex(posts);
+
+    return seriesList.flatMap((series) => {
+        const filteredPosts = getPostsBySeries(posts, series.id);
+        return paginate(filteredPosts, {
+            params: { id: series.id },
+            pageSize: siteConfig.postsPerPage || 4
+        });
+    });
+}
+
+type Props = { page: Page<CollectionEntry<'blog'>> };
+
+const { page } = Astro.props;
+const blog = page.data;
+const params = Astro.params;
+const allPosts = await getPublishedBlogPosts();
+const allSeries = getSeriesIndex(allPosts);
+const currentSeries = allSeries.find((series) => series.id === params.id);
+---
+
+<BaseLayout title={`${currentSeries?.name} 系列文章`} description={`浏览 ${currentSeries?.name} 系列下的博客文章。`} showHeader={false}>
+    <h1 class="mb-12 font-serif text-2xl leading-tight italic sm:mb-16 sm:text-4xl">系列：{currentSeries?.name}</h1>
+    {blog.map((post) => <PostPreview post={post} class="mb-10 sm:mb-12" />)}
+    <Pagination page={page} class="my-16 sm:my-24" />
+    <Subscribe class="my-16 sm:my-24" />
+</BaseLayout>

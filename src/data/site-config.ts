@@ -1,4 +1,4 @@
-import avatar from '../assets/images/avatar.png';
+import avatar from '../assets/images/avatar.jpg';
 import type { SiteConfig } from '../types';
 
 const siteConfig: SiteConfig = {
@@ -6,6 +6,10 @@ const siteConfig: SiteConfig = {
     avatar: {
         src: avatar,
         alt: 'Elowen'
+    },
+    image: {
+        src: '/og-image.svg',
+        alt: 'Elowen 技术小站'
     },
     title: 'Elowen',
     subtitle: '榆木勇闯技术圈',
@@ -22,6 +26,10 @@ const siteConfig: SiteConfig = {
         {
             text: '博客',
             href: '/blog/'
+        },
+        {
+            text: '系列',
+            href: '/series/'
         },
         {
             text: '简历',
@@ -50,7 +58,7 @@ const siteConfig: SiteConfig = {
         {
             text: 'GitHub',
             href: 'https://github.com/yuanran32'
-        },
+        }
     ],
     hero: {
         title: 'Elowen的技术小站',

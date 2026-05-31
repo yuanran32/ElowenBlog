@@ -4,7 +4,7 @@ import newsreaderWoff2 from '@fontsource-variable/newsreader/files/newsreader-la
 import { getImage } from 'astro:assets';
 import siteConfig from '../data/site-config';
 import type { ImageInput } from '../types';
-import { withBase } from '../utils/common-utils';
+import { absoluteUrl, withBase } from '../utils/common-utils';
 
 import '../styles/global.css';
 
@@ -13,16 +13,17 @@ export type Props = {
     description?: string;
     image?: ImageInput | undefined;
     pageType?: 'website' | 'article';
+    jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 };
 
-const { description = '', pageType = 'website' } = Astro.props;
+const { description = '', pageType = 'website', jsonLd } = Astro.props;
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(' | ');
 const image = Astro.props.image ?? siteConfig.image;
 let resolvedImage: { src: string; alt?: string } | undefined;
 if (image?.src) {
     if (typeof image.src === 'string') {
         resolvedImage = {
-            src: new URL(image.src, Astro.site).toString(),
+            src: absoluteUrl(image.src, Astro.site),
             alt: image.alt
         };
     } else {
@@ -54,6 +55,9 @@ function formatCanonicalURL(url: string | URL) {
     // otherwise, canonical URL always has a trailing slash
     return path.replace(/\/?$/, hasQueryParams ? '' : '/');
 }
+
+const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const serializeJsonLd = (data: Record<string, unknown>) => JSON.stringify(data).replace(/</g, '\\u003c');
 ---
 
 <!-- High Priority Global Metadata -->
@@ -90,3 +94,6 @@ function formatCanonicalURL(url: string | URL) {
 {description && <meta name="twitter:description" content={description} />}
 {resolvedImage?.src && <meta name="twitter:image" content={resolvedImage.src} />}
 {resolvedImage?.alt && <meta name="twitter:image:alt" content={resolvedImage.alt} />}
+
+<!-- Structured Data -->
+{jsonLdItems.map((item) => <script is:inline type="application/ld+json" set:html={serializeJsonLd(item)} />)}

@@ -1,10 +1,15 @@
 (function () {
     const root = document.documentElement;
 
+    function warn(message, error) {
+        console.warn(`[theme-toggle] ${message}`, error || '');
+    }
+
     function getStoredTheme() {
         try {
             return localStorage.getItem('theme');
-        } catch {
+        } catch (error) {
+            warn('无法读取 localStorage.theme', error);
             return null;
         }
     }
@@ -12,7 +17,9 @@
     function storeTheme(theme) {
         try {
             localStorage.setItem('theme', theme);
-        } catch {}
+        } catch (error) {
+            warn('无法写入 localStorage.theme', error);
+        }
     }
 
     function getSystemTheme() {
@@ -28,8 +35,7 @@
     }
 
     function applyTheme(theme) {
-        const isDark = theme === 'dark';
-        root.classList.toggle('dark', isDark);
+        root.classList.toggle('dark', theme === 'dark');
     }
 
     function setupThemeToggle() {
@@ -38,18 +44,12 @@
 
         button.onclick = () => {
             const isDark = root.classList.toggle('dark');
-            const theme = isDark ? 'dark' : 'light';
-            storeTheme(theme);
+            storeTheme(isDark ? 'dark' : 'light');
         };
     }
 
-    // Set initial theme
     applyTheme(getActiveTheme());
-
-    // Attach toggle listener on first load
     document.addEventListener('astro:page-load', setupThemeToggle);
-
-    // Re-apply theme after navigation
     document.addEventListener('astro:after-swap', () => {
         applyTheme(getActiveTheme());
         setupThemeToggle();

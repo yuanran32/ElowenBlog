@@ -6,28 +6,24 @@ import Header from '../components/Header.astro';
 import Nav from '../components/Nav.astro';
 import { withBase } from '../utils/common-utils';
 
-export type Props = HeadProps & { showHeader?: boolean };
+export type Props = HeadProps & { showHeader?: boolean; mainClass?: string };
 
-const { showHeader = true, ...head } = Astro.props;
+const { showHeader = true, mainClass = 'mx-auto w-full max-w-3xl grow', ...head } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="zh-CN" class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
-        <script>
-            if (localStorage.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
-        </script>
         <ClientRouter />
         <script is:inline src={withBase('/theme-toggle.js')}></script>
+        <script is:inline src={withBase('/code-copy.js')}></script>
     </head>
     <body class="bg-main text-main">
         <div class="flex min-h-screen flex-col px-4 md:px-8">
             <Nav />
             {showHeader && <Header />}
-            <main class="mx-auto w-full max-w-3xl grow">
+            <main class={mainClass}>
                 <slot />
             </main>
             <Footer />

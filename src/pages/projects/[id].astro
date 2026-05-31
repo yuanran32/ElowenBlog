@@ -1,12 +1,12 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { type CollectionEntry, render } from 'astro:content';
 import Button from '../../components/Button.astro';
 import ProjectPreview from '../../components/ProjectPreview.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { sortItemsByDateDesc } from '../../utils/data-utils';
+import { getAllProjects } from '../../utils/data-utils';
 
 export async function getStaticPaths() {
-    const projects = (await getCollection('projects')).sort(sortItemsByDateDesc);
+    const projects = await getAllProjects();
     const projectCount = projects.length;
     return projects.map((project, index) => ({
         params: { id: project.id },
@@ -50,32 +50,28 @@ const { Content } = await render(project);
                                 <h2 class="mb-2 font-serif text-lg italic">技术栈</h2>
                                 <div class="flex flex-wrap gap-2">
                                     {techStack.map((tech) => (
-                                        <span class="border-main rounded-full border bg-main px-2.5 py-0.5 text-xs">{tech}</span>
+                                        <span class="border-main bg-main rounded-full border px-2.5 py-0.5 text-xs">{tech}</span>
                                     ))}
                                 </div>
                             </div>
                         )}
                     </div>
-                    {
-                        highlights.length > 0 && (
-                            <div class="mt-5">
-                                <h2 class="mb-2 font-serif text-lg italic">项目亮点</h2>
-                                <ul class="grid gap-2 text-sm leading-relaxed sm:grid-cols-2">
-                                    {highlights.map((highlight) => (
-                                        <li>{highlight}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )
-                    }
-                    {
-                        (demoUrl || githubUrl) && (
-                            <div class="mt-6 flex flex-wrap gap-3">
-                                {demoUrl && <Button href={demoUrl}>在线预览</Button>}
-                                {githubUrl && <Button href={githubUrl}>查看源码</Button>}
-                            </div>
-                        )
-                    }
+                    {highlights.length > 0 && (
+                        <div class="mt-5">
+                            <h2 class="mb-2 font-serif text-lg italic">项目亮点</h2>
+                            <ul class="grid gap-2 text-sm leading-relaxed sm:grid-cols-2">
+                                {highlights.map((highlight) => (
+                                    <li>{highlight}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {(demoUrl || githubUrl) && (
+                        <div class="mt-6 flex flex-wrap gap-3">
+                            {demoUrl && <Button href={demoUrl}>在线预览</Button>}
+                            {githubUrl && <Button href={githubUrl}>查看源码</Button>}
+                        </div>
+                    )}
                 </section>
             )
         }

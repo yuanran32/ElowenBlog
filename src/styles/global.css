@@ -81,7 +81,7 @@ html.dark {
     }
 
     .prose a {
-        @apply underline font-normal decoration-1 underline-offset-2 decoration-dashed hover:decoration-solid;
+        @apply font-normal underline decoration-dashed decoration-1 underline-offset-2 hover:decoration-solid;
     }
 
     .prose :where(h1, h2, h3, h4, h5, h6) {
@@ -93,7 +93,7 @@ html.dark {
     }
 
     .prose :where(:not(pre) > code) {
-        @apply bg-muted rounded px-1 py-0.5 text-[0.9em];
+        @apply font-medium text-[0.95em];
     }
 
     .prose pre {
@@ -101,10 +101,18 @@ html.dark {
     }
 
     .prose pre code {
-        @apply bg-transparent p-0 text-[inherit] font-normal;
+        @apply bg-transparent p-0 font-normal text-[inherit];
+    }
+
+    .prose .code-block {
+        @apply relative pt-12;
+    }
+
+    .prose .code-copy-button {
+        @apply border-main bg-main text-main hover:bg-muted absolute top-3 right-3 cursor-pointer rounded-full border px-3 py-1 text-xs leading-none transition-colors;
     }
 
     .prose blockquote {
-        @apply font-serif font-normal italic border-none pl-0 text-[1.375em] leading-snug sm:text-[1.66667em];
+        @apply border-none pl-0 font-serif text-[1.375em] leading-snug font-normal italic sm:text-[1.66667em];
     }
 }

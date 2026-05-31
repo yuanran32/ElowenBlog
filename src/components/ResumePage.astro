@@ -1,0 +1,176 @@
+---
+import Button from './Button.astro';
+
+const contactLinks = [
+    { label: '邮箱', value: '3916048194@qq.com', href: 'mailto:3916048194@qq.com' },
+    { label: 'GitHub', value: 'github.com/yuanran32', href: 'https://github.com/yuanran32' },
+    { label: '博客', value: 'yuanran32.github.io/myBlog', href: 'https://yuanran32.github.io/myBlog/' }
+];
+
+const skillGroups = [
+    {
+        title: '前端基础',
+        skills: ['HTML', 'CSS', 'JavaScript', 'TypeScript']
+    },
+    {
+        title: '框架与工程',
+        skills: ['React', 'Vue', 'Astro', 'Vite', 'Tailwind CSS']
+    },
+    {
+        title: '后端与数据',
+        skills: ['Node.js', '接口开发', 'MySQL', 'MongoDB']
+    },
+    {
+        title: '工具链',
+        skills: ['Git', 'npm', 'pnpm', 'Web 工程化']
+    }
+];
+
+const projects = [
+    {
+        title: '个人博客系统',
+        description: '基于 Astro 和 Tailwind CSS 搭建的个人博客，用于记录技术文章、项目经验和学习笔记。',
+        techStack: ['Astro', 'Markdown', 'Tailwind CSS', 'TypeScript'],
+        highlights: [
+            '负责博客站点的页面配置、内容管理和部署流程',
+            '使用 Markdown 管理文章内容，支持标签、分页、系列和 SEO 信息',
+            '配置站点地图、RSS 和基础 SEO 元信息，适配 GitHub Pages 部署'
+        ]
+    },
+    {
+        title: '前端数据透视分析工作台',
+        description: '面向本地 Excel / CSV 数据分析场景，提升数据导入、透视聚合、图表展示和结果导出效率。',
+        techStack: ['TypeScript', 'xlsx', 'Web Worker', 'IndexedDB', '数据可视化'],
+        highlights: [
+            '基于 xlsx 实现 Excel / CSV 导入，处理空行、重复表头和字段类型推断',
+            '对手机号、编号、id、code、前导 0 和长数字等字段做字符串保留，避免精度丢失',
+            '基于 Map 分桶实现多维度聚合，支持 sum、count、avg、min、max 等计算',
+            '将透视计算迁移到 Web Worker，降低主线程阻塞并提升复杂数据场景交互流畅度',
+            '使用 IndexedDB 缓存最近数据集、透视配置和分析模板，支持 CSV / Excel / PNG 导出'
+        ]
+    }
+];
+
+const experiences = [
+    {
+        company: '北京博视',
+        role: '前端实习',
+        period: '2026.05 - 至今',
+        highlights: ['参与业务模块开发，完成页面、接口或数据处理逻辑', '与产品、设计或后端协作，推动功能上线', '修复线上问题，提升用户体验或系统稳定性']
+    }
+];
+---
+
+<article class="mb-16 sm:mb-24">
+    <header class="mb-12 sm:mb-16">
+        <p class="mb-3 text-sm">前端开发 / 全栈开发</p>
+        <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">Elowen</h1>
+        <p class="mt-5 max-w-2xl text-base leading-relaxed sm:text-lg">关注前端开发、Web 工程化和全栈应用开发，重视项目落地、问题复盘和可维护的工程实践。</p>
+        <div class="mt-7 flex flex-wrap gap-3">
+            <Button href="mailto:3916048194@qq.com">联系我</Button>
+            <Button href="https://github.com/yuanran32">GitHub</Button>
+        </div>
+    </header>
+
+    <section class="mb-12 sm:mb-16">
+        <h2 class="mb-5 font-serif text-xl italic sm:text-2xl">基本信息</h2>
+        <div class="border-main grid gap-4 border border-dashed p-5 text-sm sm:grid-cols-3">
+            {
+                contactLinks.map((link) => (
+                    <div>
+                        <div class="mb-1 opacity-75">{link.label}</div>
+                        <a class="break-all hover:underline hover:underline-offset-2" href={link.href}>
+                            {link.value}
+                        </a>
+                    </div>
+                ))
+            }
+        </div>
+    </section>
+
+    <section class="mb-12 sm:mb-16">
+        <h2 class="mb-5 font-serif text-xl italic sm:text-2xl">技术栈</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+            {
+                skillGroups.map((group) => (
+                    <section class="border-main border border-dashed p-5">
+                        <h3 class="mb-3 font-serif text-lg font-medium">{group.title}</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {group.skills.map((skill) => (
+                                <span class="border-main bg-muted rounded-full border px-3 py-1 text-xs">{skill}</span>
+                            ))}
+                        </div>
+                    </section>
+                ))
+            }
+        </div>
+    </section>
+
+    <section class="mb-12 sm:mb-16">
+        <h2 class="mb-5 font-serif text-xl italic sm:text-2xl">项目经历</h2>
+        <div class="space-y-6">
+            {
+                projects.map((project) => (
+                    <section class="border-main border border-dashed p-5">
+                        <div class="mb-4">
+                            <h3 class="font-serif text-xl leading-tight font-medium">{project.title}</h3>
+                            <p class="mt-2 text-sm leading-relaxed">{project.description}</p>
+                        </div>
+                        <div class="mb-4 flex flex-wrap gap-2">
+                            {project.techStack.map((tech) => (
+                                <span class="border-main bg-muted rounded-full border px-3 py-1 text-xs">{tech}</span>
+                            ))}
+                        </div>
+                        <ul class="space-y-2 text-sm leading-relaxed">
+                            {project.highlights.map((highlight) => (
+                                <li>{highlight}</li>
+                            ))}
+                        </ul>
+                    </section>
+                ))
+            }
+        </div>
+    </section>
+
+    <section class="mb-12 sm:mb-16">
+        <h2 class="mb-5 font-serif text-xl italic sm:text-2xl">实习 / 工作经历</h2>
+        <div class="space-y-6">
+            {
+                experiences.map((experience) => (
+                    <section class="border-main border border-dashed p-5">
+                        <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                            <h3 class="font-serif text-xl leading-tight font-medium">
+                                {experience.company} - {experience.role}
+                            </h3>
+                            <p class="text-sm">{experience.period}</p>
+                        </div>
+                        <ul class="space-y-2 text-sm leading-relaxed">
+                            {experience.highlights.map((highlight) => (
+                                <li>{highlight}</li>
+                            ))}
+                        </ul>
+                    </section>
+                ))
+            }
+        </div>
+    </section>
+
+    <section class="mb-12 sm:mb-16">
+        <h2 class="mb-5 font-serif text-xl italic sm:text-2xl">教育经历</h2>
+        <div class="border-main border border-dashed p-5">
+            <h3 class="font-serif text-xl leading-tight font-medium">成都信息工程大学</h3>
+            <p class="mt-2 text-sm leading-relaxed">软件工程 · 2025.09 - 2029.06</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="mb-5 font-serif text-xl italic sm:text-2xl">联系方式</h2>
+        <div class="border-main bg-muted border border-dashed p-5">
+            <p class="mb-5 text-sm leading-relaxed">如果你对我的经历或项目感兴趣，可以通过邮箱或 GitHub 联系我。</p>
+            <div class="flex flex-wrap gap-3">
+                <Button href="mailto:3916048194@qq.com">发送邮件</Button>
+                <Button href="https://github.com/yuanran32">查看 GitHub</Button>
+            </div>
+        </div>
+    </section>
+</article>

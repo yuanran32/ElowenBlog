@@ -1,22 +1,36 @@
 ---
-import { getCollection } from 'astro:content';
 import Button from '../components/Button.astro';
 import Hero from '../components/Hero.astro';
 import PostPreview from '../components/PostPreview.astro';
 import ProjectPreview from '../components/ProjectPreview.astro';
 import siteConfig from '../data/site-config';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { filterPublishedPosts, sortItemsByDateDesc } from '../utils/data-utils';
+import { getFeaturedBlogPosts, getFeaturedProjects } from '../utils/data-utils';
 
-const posts = filterPublishedPosts(await getCollection('blog')).sort(sortItemsByDateDesc);
-const featuredPosts = posts.filter(({ data }) => data.isFeatured);
-
-const projects = (await getCollection('projects')).sort(sortItemsByDateDesc);
-const featuredProjects = projects.filter(({ data }) => data.isFeatured);
+const featuredPosts = await getFeaturedBlogPosts();
+const featuredProjects = await getFeaturedProjects();
 const focusAreas = ['前端开发', 'Web 工程化', '前端测试', '全栈应用', '数据可视化'];
+const homeJsonLd = [
+    {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: siteConfig.title,
+        url: siteConfig.website,
+        description: siteConfig.description,
+        inLanguage: 'zh-CN'
+    },
+    {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: siteConfig.title,
+        url: siteConfig.website,
+        sameAs: ['https://github.com/yuanran32'],
+        jobTitle: '前端开发 / 全栈开发'
+    }
+];
 ---
 
-<BaseLayout description={siteConfig.description}>
+<BaseLayout description={siteConfig.description} jsonLd={homeJsonLd}>
     <Hero {...siteConfig.hero} />
     <section class="mb-16 sm:mb-24">
         <h2 class="mb-6 font-serif text-xl italic sm:text-2xl">当前关注</h2>

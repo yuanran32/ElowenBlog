@@ -1,0 +1,12 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="630" fill="#eef7d8"/>
+    <rect x="56" y="56" width="1088" height="518" fill="#dceec0" stroke="#26351f" stroke-width="3" stroke-dasharray="12 10"/>
+    <circle cx="994" cy="166" r="82" fill="#b7db7d" stroke="#26351f" stroke-width="3"/>
+    <circle cx="1046" cy="424" r="42" fill="#eef7d8" stroke="#26351f" stroke-width="3"/>
+    <path d="M121 182H384" stroke="#26351f" stroke-width="3" stroke-linecap="round"/>
+    <path d="M121 450H515" stroke="#26351f" stroke-width="3" stroke-linecap="round"/>
+    <text x="120" y="295" fill="#17210f" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="600">Elowen</text>
+    <text x="124" y="365" fill="#17210f" font-family="Inter, Arial, sans-serif" font-size="34">技术学习 · 项目实践 · 问题复盘</text>
+    <text x="124" y="493" fill="#17210f" font-family="Inter, Arial, sans-serif" font-size="26">yuanran32.github.io/myBlog</text>
+    <text x="870" y="505" fill="#17210f" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-style="italic">Blog</text>
+</svg>

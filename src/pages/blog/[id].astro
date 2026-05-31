@@ -1,15 +1,14 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { type CollectionEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import PostPreview from '../../components/PostPreview.astro';
-import Subscribe from '../../components/Subscribe.astro';
-import { filterPublishedPosts, sortItemsByDateDesc } from '../../utils/data-utils';
-import { slugify, withBase } from '../../utils/common-utils';
+import { getPublishedBlogPosts, getReadingTime } from '../../utils/data-utils';
+import { absoluteUrl, slugify, withBase } from '../../utils/common-utils';
 
 export async function getStaticPaths() {
-    const posts = filterPublishedPosts(await getCollection('blog')).sort(sortItemsByDateDesc);
+    const posts = await getPublishedBlogPosts();
     const postCount = posts.length;
     return posts.map((post, index) => ({
         params: { id: post.id },
@@ -25,17 +24,52 @@ type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>;
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], series, seo } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags = [], series, draft, seo } = post.data;
 const { Content, headings } = await render(post);
 const tableOfContents = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+const readingTime = getReadingTime(post.body);
+const postUrl = absoluteUrl(`/blog/${post.id}/`, Astro.site);
+const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description: seo?.description ?? excerpt,
+    url: postUrl,
+    image: absoluteUrl('/og-image.svg', Astro.site),
+    datePublished: publishDate.toISOString(),
+    dateModified: (updatedDate ?? publishDate).toISOString(),
+    author: {
+        '@type': 'Person',
+        name: 'Elowen',
+        url: 'https://github.com/yuanran32'
+    },
+    publisher: {
+        '@type': 'Person',
+        name: 'Elowen',
+        url: 'https://github.com/yuanran32'
+    },
+    keywords: tags,
+    articleSection: series,
+    inLanguage: 'zh-CN'
+};
 ---
 
-<BaseLayout title={seo?.title ?? title} description={seo?.description ?? excerpt} image={seo?.image} pageType="article" showHeader={false}>
+<BaseLayout
+    title={seo?.title ?? title}
+    description={seo?.description ?? excerpt}
+    image={seo?.image}
+    pageType="article"
+    showHeader={false}
+    mainClass="mx-auto w-full max-w-3xl grow lg:relative"
+    jsonLd={articleJsonLd}
+>
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
             <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">{title}</h1>
             <div class="mt-4 text-sm">
+                {draft && <span class="mr-2">草稿</span>}
                 <FormattedDate date={publishDate} />
+                <span> · {readingTime} 分钟阅读</span>
                 {
                     updatedDate && (
                         <>
@@ -60,22 +94,6 @@ const tableOfContents = headings.filter((heading) => heading.depth >= 2 && headi
                 )
             }
         </header>
-        {
-            tableOfContents.length > 0 && (
-                <nav class="border-main bg-muted mb-10 border border-dashed px-5 py-4 text-sm" aria-label="文章目录">
-                    <h2 class="mb-3 font-serif text-lg italic">目录</h2>
-                    <ol class="space-y-2">
-                        {tableOfContents.map((heading) => (
-                            <li class:list={[heading.depth === 3 && 'pl-4']}>
-                                <a class="hover:underline hover:underline-offset-2" href={`#${heading.slug}`}>
-                                    {heading.text}
-                                </a>
-                            </li>
-                        ))}
-                    </ol>
-                </nav>
-            )
-        }
         <div class="prose sm:prose-lg max-w-none">
             <Content />
         </div>
@@ -92,27 +110,22 @@ const tableOfContents = headings.filter((heading) => heading.depth >= 2 && headi
             </div>
         )
     }
-    <Subscribe class="my-16 sm:my-24" />
+    {
+        tableOfContents.length > 0 && (
+            <aside class="mb-10 xl:fixed xl:top-24 xl:left-[calc(50%+24rem+4rem)] xl:mb-0 xl:w-72" aria-label="文章目录">
+                <nav class="border-main bg-muted max-h-[calc(100vh-7rem)] overflow-y-auto border border-dashed px-5 py-4 text-sm">
+                    <h2 class="mb-3 font-serif text-lg italic">目录</h2>
+                    <ol class="space-y-2">
+                        {tableOfContents.map((heading) => (
+                            <li class:list={[heading.depth === 3 && 'pl-4']}>
+                                <a class="hover:underline hover:underline-offset-2" href={`#${heading.slug}`}>
+                                    {heading.text}
+                                </a>
+                            </li>
+                        ))}
+                    </ol>
+                </nav>
+            </aside>
+        )
+    }
 </BaseLayout>
-
-<script>
-    document.addEventListener('astro:page-load', () => {
-        const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement;
-        copyUrlButton?.addEventListener('click', async () => {
-            await copyUrl(copyUrlButton);
-        });
-
-        async function copyUrl(button: HTMLButtonElement) {
-            let url = button.getAttribute('data-url') || '';
-            let label = button.innerText;
-
-            await navigator.clipboard.writeText(url);
-
-            button.innerText = '已复制';
-
-            setTimeout(() => {
-                button.innerText = label;
-            }, 2500);
-        }
-    });
-</script>

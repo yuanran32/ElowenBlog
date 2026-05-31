@@ -6,6 +6,10 @@
         "dev": "astro dev",
         "start": "astro dev",
         "build": "astro build",
+        "build:strict": "pnpm run check && pnpm run build",
+        "check": "astro check",
+        "format": "prettier --write --ignore-unknown .",
+        "format:check": "prettier --check --ignore-unknown .",
         "preview": "astro preview",
         "astro": "astro"
     },
@@ -22,9 +26,11 @@
         "tailwindcss": "^4.1.17"
     },
     "devDependencies": {
+        "@astrojs/check": "^0.9.9",
         "@tailwindcss/typography": "^0.5.19",
         "prettier": "^3.6.2",
         "prettier-plugin-astro": "^0.14.1",
-        "prettier-plugin-tailwindcss": "^0.7.1"
+        "prettier-plugin-tailwindcss": "^0.7.1",
+        "typescript": "^5.9.3"
     }
 }

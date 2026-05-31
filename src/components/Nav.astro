@@ -93,8 +93,12 @@ const navLinks = siteConfig.headerNavLinks ?? [];
 <script>
     function menuToggle() {
         const menu = document.querySelector('.menu');
-        const menuToggleBtn = document.querySelector('.menu-toggle');
-        menuToggleBtn?.addEventListener('click', () => {
+        const menuToggleBtn = document.querySelector<HTMLButtonElement>('.menu-toggle');
+        if (!menu || !menuToggleBtn) return;
+        if (menuToggleBtn.dataset.menuReady === 'true') return;
+
+        menuToggleBtn.dataset.menuReady = 'true';
+        menuToggleBtn.addEventListener('click', () => {
             const isMenuExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
             menuToggleBtn.classList.toggle('is-active');
             menuToggleBtn.setAttribute('aria-expanded', isMenuExpanded ? 'false' : 'true');

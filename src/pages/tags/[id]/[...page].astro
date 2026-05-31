@@ -1,16 +1,16 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro';
-import { type CollectionEntry, getCollection } from 'astro:content';
+import { type CollectionEntry } from 'astro:content';
 import Pagination from '../../../components/Pagination.astro';
 import PostPreview from '../../../components/PostPreview.astro';
 import Subscribe from '../../../components/Subscribe.astro';
 import siteConfig from '../../../data/site-config';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { filterPublishedPosts, getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../../utils/data-utils';
+import { getPublishedBlogPosts, getPostsByTag, getTagIndex } from '../../../utils/data-utils';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-    const posts = filterPublishedPosts(await getCollection('blog')).sort(sortItemsByDateDesc);
-    const tags = getAllTags(posts);
+    const posts = await getPublishedBlogPosts();
+    const tags = getTagIndex(posts);
 
     return tags.flatMap((tag) => {
         const filteredPosts = getPostsByTag(posts, tag.id);
@@ -26,8 +26,8 @@ type Props = { page: Page<CollectionEntry<'blog'>> };
 const { page } = Astro.props;
 const blog = page.data;
 const params = Astro.params;
-const allPosts = filterPublishedPosts(await getCollection('blog'));
-const allTags = getAllTags(allPosts);
+const allPosts = await getPublishedBlogPosts();
+const allTags = getTagIndex(allPosts);
 const currentTag = allTags.find((tag) => {
     return tag.id === params.id;
 });
