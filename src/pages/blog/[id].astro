@@ -63,6 +63,7 @@ const articleJsonLd = {
     mainClass="mx-auto w-full max-w-3xl grow lg:relative"
     jsonLd={articleJsonLd}
 >
+    <div class="reading-progress fixed top-0 left-0 z-50 h-0.5 bg-current transition-[width] duration-100" style="width: 0%"></div>
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
             <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">{title}</h1>
@@ -112,7 +113,7 @@ const articleJsonLd = {
     }
     {
         tableOfContents.length > 0 && (
-            <aside class="mb-10 xl:fixed xl:top-24 xl:left-[calc(50%+24rem+4rem)] xl:mb-0 xl:w-72" aria-label="文章目录">
+            <aside class="mb-10 xl:fixed xl:top-24 xl:right-8 xl:mb-0 xl:w-56 xl:max-w-[calc(50%-22rem)]" aria-label="文章目录">
                 <nav class="border-main bg-muted max-h-[calc(100vh-7rem)] overflow-y-auto border border-dashed px-5 py-4 text-sm">
                     <h2 class="mb-3 font-serif text-lg italic">目录</h2>
                     <ol class="space-y-2">
@@ -129,3 +130,38 @@ const articleJsonLd = {
         )
     }
 </BaseLayout>
+
+<button
+    class="back-to-top fixed right-6 bottom-6 z-50 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-dashed border-main bg-main opacity-0 transition-opacity hover:bg-muted"
+    aria-label="返回顶部"
+>
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+</button>
+
+<script>
+    function initBlogEnhancements() {
+        const progress = document.querySelector<HTMLElement>('.reading-progress');
+        const backToTop = document.querySelector<HTMLButtonElement>('.back-to-top');
+        if (!progress || !backToTop) return;
+
+        function onScroll() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const percent = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+            progress!.style.width = `${percent}%`;
+            backToTop!.style.opacity = scrollTop > window.innerHeight ? '1' : '0';
+            backToTop!.style.pointerEvents = scrollTop > window.innerHeight ? 'auto' : 'none';
+        }
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+    initBlogEnhancements();
+    document.addEventListener('astro:page-load', initBlogEnhancements);
+</script>

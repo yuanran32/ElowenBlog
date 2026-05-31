@@ -8,6 +8,22 @@ const currentYear = new Date().getFullYear();
 ---
 
 <footer class="mx-auto w-full max-w-3xl pt-12 pb-10 sm:pt-24 sm:pb-14">
+    <div class="mb-8 flex justify-center">
+        <svg class="growing-plant h-28 w-20 opacity-75" viewBox="0 0 80 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 主茎 -->
+            <path class="plant-path" d="M40 108 C40 108 40 85 39 70 C38 55 41 40 40 25" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <!-- 左下叶 -->
+            <path class="plant-path" d="M39 75 C34 72 26 74 22 80 C28 78 34 75 39 75" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- 右中叶 -->
+            <path class="plant-path" d="M40 58 C46 54 54 55 58 50 C52 52 46 55 40 58" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- 左上叶 -->
+            <path class="plant-path" d="M39 42 C33 38 25 38 22 33 C28 35 34 38 39 42" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- 顶部嫩芽左 -->
+            <path class="plant-path" d="M40 25 C36 20 33 12 35 6 C37 12 38 18 40 25" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- 顶部嫩芽右 -->
+            <path class="plant-path" d="M40 25 C44 20 47 12 45 6 C43 12 42 18 40 25" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </div>
     {
         navLinks.length > 0 && (
             <nav class="mb-4 flex flex-wrap gap-x-6 gap-y-1" aria-label="页脚导航">
@@ -47,3 +63,41 @@ const currentYear = new Date().getFullYear();
         </p>
     </div>
 </footer>
+
+<script>
+    function initGrowingPlant() {
+        const plant = document.querySelector<SVGElement>('.growing-plant');
+        if (!plant) return;
+
+        const paths = plant.querySelectorAll<SVGPathElement | SVGCircleElement>('.plant-path');
+        paths.forEach((path) => {
+            const length = path.getTotalLength();
+            path.style.strokeDasharray = `${length}`;
+            path.style.strokeDashoffset = `${length}`;
+            path.style.transition = 'none';
+        });
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        let delay = 0;
+                        paths.forEach((path) => {
+                            setTimeout(() => {
+                                path.style.transition = 'stroke-dashoffset 1s ease-out';
+                                path.style.strokeDashoffset = '0';
+                            }, delay);
+                            delay += 300;
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.3 }
+        );
+
+        observer.observe(plant);
+    }
+    initGrowingPlant();
+    document.addEventListener('astro:page-load', initGrowingPlant);
+</script>

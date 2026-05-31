@@ -12,7 +12,14 @@ const { title, image, text, actions } = Astro.props;
 {
     (title || image?.src || text || (actions && actions.length > 0)) && (
         <section class="mb-16 flex w-full flex-col gap-8 sm:mb-24">
-            {title && <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">{title}</h1>}
+            {title && (
+                <div>
+                    <h1 class="hero-title font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">
+                        <span class="hero-title-text">{title}</span><span class="hero-cursor">|</span>
+                    </h1>
+                    <p class="hero-greeting mt-3 text-sm opacity-0 transition-opacity duration-700 sm:text-base"></p>
+                </div>
+            )}
             {image?.src && (
                 <figure>
                     <CustomImage
@@ -37,3 +44,53 @@ const { title, image, text, actions } = Astro.props;
         </section>
     )
 }
+
+<script>
+    function initHeroEffects() {
+        const titleText = document.querySelector<HTMLElement>('.hero-title-text');
+        const cursor = document.querySelector<HTMLElement>('.hero-cursor');
+        const greeting = document.querySelector<HTMLElement>('.hero-greeting');
+        if (!titleText || !cursor || !greeting) return;
+
+        // Time-aware greeting
+        const hour = new Date().getHours();
+        let greetingText = '';
+        if (hour >= 6 && hour < 11) greetingText = '早安，新的一天从阅读开始';
+        else if (hour >= 11 && hour < 14) greetingText = '午间小憩，来读点什么';
+        else if (hour >= 14 && hour < 18) greetingText = '下午好，一起探索技术世界';
+        else if (hour >= 18 && hour < 22) greetingText = '晚上好，适合沉浸式阅读';
+        else greetingText = '夜深了，感谢你的到来';
+
+        // Typewriter effect (once per session)
+        const played = sessionStorage.getItem('hero-typed');
+        if (played) {
+            cursor.style.display = 'none';
+            greeting.textContent = greetingText;
+            greeting.style.opacity = '1';
+            return;
+        }
+
+        const fullText = titleText.textContent || '';
+        titleText.textContent = '';
+        cursor.style.display = 'inline';
+        let i = 0;
+
+        function type() {
+            if (i < fullText.length) {
+                titleText!.textContent += fullText[i];
+                i++;
+                setTimeout(type, 80 + Math.random() * 40);
+            } else {
+                sessionStorage.setItem('hero-typed', '1');
+                setTimeout(() => {
+                    cursor.style.display = 'none';
+                    greeting.textContent = greetingText;
+                    greeting.style.opacity = '1';
+                }, 400);
+            }
+        }
+        type();
+    }
+    initHeroEffects();
+    document.addEventListener('astro:page-load', initHeroEffects);
+</script>

@@ -98,12 +98,50 @@ const navLinks = siteConfig.headerNavLinks ?? [];
         if (menuToggleBtn.dataset.menuReady === 'true') return;
 
         menuToggleBtn.dataset.menuReady = 'true';
+
+        function openMenu() {
+            menuToggleBtn!.classList.add('is-active');
+            menuToggleBtn!.setAttribute('aria-expanded', 'true');
+            menuToggleBtn!.setAttribute('aria-label', '关闭菜单');
+            menu!.classList.add('is-visible');
+        }
+
+        function closeMenu() {
+            menuToggleBtn!.classList.remove('is-active');
+            menuToggleBtn!.setAttribute('aria-expanded', 'false');
+            menuToggleBtn!.setAttribute('aria-label', '打开菜单');
+            menu!.classList.remove('is-visible');
+            menuToggleBtn!.focus();
+        }
+
         menuToggleBtn.addEventListener('click', () => {
             const isMenuExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
-            menuToggleBtn.classList.toggle('is-active');
-            menuToggleBtn.setAttribute('aria-expanded', isMenuExpanded ? 'false' : 'true');
-            menuToggleBtn.setAttribute('aria-label', isMenuExpanded ? '打开菜单' : '关闭菜单');
-            menu?.classList.toggle('is-visible');
+            if (isMenuExpanded) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menuToggleBtn.getAttribute('aria-expanded') === 'true') {
+                closeMenu();
+            }
+        });
+
+        menu.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const focusable = menu!.querySelectorAll<HTMLElement>('a, button');
+            if (focusable.length === 0) return;
+            const first = menuToggleBtn!;
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         });
     }
     menuToggle();
