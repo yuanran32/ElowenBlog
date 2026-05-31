@@ -41,6 +41,7 @@ export type SiteConfig = {
     footerNavLinks?: Link[];
     socialLinks?: Link[];
     hero?: Hero;
+    focusAreas?: string[];
     subscribe?: Subscribe;
     postsPerPage?: number;
     projectsPerPage?: number;

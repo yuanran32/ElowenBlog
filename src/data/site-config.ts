@@ -8,12 +8,12 @@ const siteConfig: SiteConfig = {
         alt: 'Elowen'
     },
     image: {
-        src: '/og-image.svg',
+        src: '/og-image.png',
         alt: 'Elowen 技术小站'
     },
     title: 'Elowen',
     subtitle: '榆木勇闯技术圈',
-    description: '记录技术学习',
+    description: '前端工程师 Elowen 的技术博客，记录前端开发、Web 工程化、TypeScript 实践与项目复盘，分享学习过程中的思考和踩坑经验。',
     headerNavLinks: [
         {
             text: '首页',
@@ -70,6 +70,7 @@ const siteConfig: SiteConfig = {
             }
         ]
     },
+    focusAreas: ['前端开发', 'Web 工程化', '前端测试', '全栈应用', '数据可视化'],
     subscribe: {
         enabled: false,
         title: '订阅博客更新',

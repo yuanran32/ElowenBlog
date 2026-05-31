@@ -2,7 +2,7 @@ export function slugify(input?: string) {
     if (!input) return '';
 
     // make lower case and trim
-    var slug = input.toLowerCase().trim();
+    let slug = input.toLowerCase().trim();
 
     // remove accents from charaters
     slug = slug.normalize('NFD').replace(/[̀-ͯ]/g, '');
