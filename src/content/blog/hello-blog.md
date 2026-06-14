@@ -3,6 +3,7 @@ title: 从零搭建个人博客：技术选型与踩坑记录
 excerpt: 记录使用 Astro 5 + Tailwind CSS v4 搭建个人博客的完整过程，包括技术选型思路、开发体验和部署踩坑。
 publishDate: '2026-05-30'
 isFeatured: true
+cover: ../../assets/images/blog/hello-blog.png
 series: 博客建设
 tags:
   - 前端
@@ -11,6 +12,10 @@ tags:
 seo:
   title: 从零搭建个人博客：Astro 5 + Tailwind CSS v4 实践
   description: 使用 Astro 5 和 Tailwind CSS v4 搭建个人博客的技术选型、开发体验和 GitHub Pages 部署踩坑记录。
+  image:
+    src: ../../assets/images/blog/hello-blog.png
+    alt: 从零搭建个人博客文章封面
+  pageType: article
 ---
 
 一直想有一个自己的技术博客，用来沉淀学习过程中的思考和实践。经过一番调研和折腾，最终选择了 Astro 作为框架，这篇文章记录整个搭建过程中的决策和踩坑经历。

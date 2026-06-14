@@ -3,6 +3,7 @@ title: 前端到底该写哪些测试？单测、组件测试、E2E 的分工
 excerpt: 我以前也以为前端测试就是把覆盖率刷上去，后来踩过脆弱快照、过度 mock、E2E 雪崩之后，才慢慢意识到测试真正要解决的是风险分层。
 publishDate: '2026-05-30'
 isFeatured: true
+cover: ../../assets/images/blog/frontend-testing-strategy.png
 series: 前端测试
 tags:
   - 前端
@@ -11,6 +12,9 @@ tags:
 seo:
   title: 前端到底该写哪些测试？单测、组件测试、E2E 的分工
   description: 结合前端项目里的真实踩坑，聊聊单测、组件测试和 E2E 分别应该测什么，以及为什么测试不是覆盖率游戏。
+  image:
+    src: ../../assets/images/blog/frontend-testing-strategy.png
+    alt: 前端测试分工文章封面
   pageType: article
 ---
 
