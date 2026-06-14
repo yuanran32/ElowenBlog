@@ -3,13 +3,16 @@ import NavLink from './NavLink.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import siteConfig from '../data/site-config';
 
+type Props = { containerClass?: string };
+
+const { containerClass = 'max-w-3xl' } = Astro.props;
 const navLinks = siteConfig.headerNavLinks ?? [];
 ---
 
 <nav class="relative min-h-10 pt-4 pb-12 sm:min-h-14 sm:pb-24 md:pt-8" aria-label="主导航">
     {
         navLinks.length > 0 && (
-            <div class="relative mx-auto w-full max-w-3xl">
+            <div class:list={['relative mx-auto w-full', containerClass]}>
                 <button
                     class="menu-toggle relative z-30 -ml-1 flex h-8 w-8 cursor-pointer items-center justify-center md:hidden"
                     aria-label="打开菜单"
@@ -92,7 +95,7 @@ const navLinks = siteConfig.headerNavLinks ?? [];
 
 <script>
     function menuToggle() {
-        const menu = document.querySelector('.menu');
+        const menu = document.querySelector<HTMLElement>('.menu');
         const menuToggleBtn = document.querySelector<HTMLButtonElement>('.menu-toggle');
         if (!menu || !menuToggleBtn) return;
         if (menuToggleBtn.dataset.menuReady === 'true') return;

@@ -1,0 +1,35 @@
+---
+import { slugify } from '../utils/common-utils';
+
+type Props = { title: string; series?: string; class?: string };
+
+const { title, series, class: className } = Astro.props;
+
+// 按 系列名/标题 生成稳定 hash → 取一个色相，使每篇占位图颜色固定且彼此区分。
+const key = slugify(series || title) || title || 'post';
+let hash = 0;
+for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) | 0;
+}
+const hue = Math.abs(hash) % 360;
+const label = series || title;
+---
+
+<div class:list={['cover-fallback relative flex aspect-[16/9] items-end p-4', className]} style={`--hue: ${hue};`} aria-hidden="true">
+    <span class="cover-fallback-label line-clamp-2 font-serif text-lg leading-tight italic sm:text-xl">{label}</span>
+</div>
+
+<style>
+    .cover-fallback {
+        background-image: linear-gradient(135deg, hsl(var(--hue) 40% 82%), hsl(var(--hue) 34% 62%));
+    }
+    .cover-fallback-label {
+        color: hsl(var(--hue) 45% 28%);
+    }
+    :global(html.dark) .cover-fallback {
+        background-image: linear-gradient(135deg, hsl(var(--hue) 26% 30%), hsl(var(--hue) 22% 17%));
+    }
+    :global(html.dark) .cover-fallback-label {
+        color: hsl(var(--hue) 40% 85%);
+    }
+</style>

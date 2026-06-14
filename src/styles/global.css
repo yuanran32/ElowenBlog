@@ -9,12 +9,14 @@
 
 :root {
     --text-main: #17210f;
+    --text-muted: #4f5d3f;
     --bg-main: #eef7d8;
     --bg-muted: #dceec0;
     --border-main: #26351f;
 }
 html.dark {
     --text-main: #eef7d8;
+    --text-muted: #9aae7a;
     --bg-main: #11180f;
     --bg-muted: #1c2718;
     --border-main: #b7db7d;
@@ -56,12 +58,18 @@ html.dark {
     --font-sans: 'Inter Variable', sans-serif;
     --font-serif: 'Newsreader Variable', serif;
     --text-color-main: var(--text-main);
+    --text-color-muted: var(--text-muted);
     --background-color-main: var(--bg-main);
     --background-color-muted: var(--bg-muted);
     --border-color-main: var(--border-main);
 }
 
 @layer utilities {
+    .toc-active {
+        color: var(--border-main);
+        font-weight: 600;
+    }
+
     .hero-cursor {
         animation: blink 0.8s step-end infinite;
         font-weight: 100;
@@ -105,6 +113,11 @@ html.dark {
 
     .prose :where(:not(pre) > code) {
         @apply font-medium text-[0.95em];
+    }
+
+    .prose :where(:not(pre) > code)::before,
+    .prose :where(:not(pre) > code)::after {
+        content: none;
     }
 
     .prose pre {

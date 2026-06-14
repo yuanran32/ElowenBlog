@@ -2,12 +2,15 @@
 import siteConfig from '../data/site-config';
 import { withBase } from '../utils/common-utils';
 
+type Props = { containerClass?: string };
+
+const { containerClass = 'max-w-3xl' } = Astro.props;
 const socialLinks = siteConfig.socialLinks ?? [];
 const navLinks = siteConfig.footerNavLinks ?? [];
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="mx-auto w-full max-w-3xl pt-12 pb-10 sm:pt-24 sm:pb-14">
+<footer class:list={['mx-auto w-full pt-12 pb-10 sm:pt-24 sm:pb-14', containerClass]}>
     <div class="mb-8 flex justify-center">
         <svg class="growing-plant h-28 w-20 opacity-75" viewBox="0 0 80 112" fill="none" xmlns="http://www.w3.org/2000/svg">
             <!-- 主茎 -->

@@ -1,0 +1,46 @@
+---
+import { withBase } from '../utils/common-utils';
+import SidebarCard from './SidebarCard.astro';
+
+type TagItem = { name: string; id: string; count: number };
+type Props = { tags: TagItem[]; class?: string; max?: number };
+
+const { tags, class: className, max = 20 } = Astro.props;
+
+const shown = tags.slice(0, max);
+const counts = shown.map((tag) => tag.count);
+const minCount = Math.min(...counts, 1);
+const maxCount = Math.max(...counts, 1);
+
+// 按 count 在最小/最大之间映射到三档字号
+function sizeClass(count: number) {
+    if (maxCount === minCount) return 'text-sm';
+    const ratio = (count - minCount) / (maxCount - minCount);
+    if (ratio > 0.66) return 'text-base';
+    if (ratio > 0.33) return 'text-sm';
+    return 'text-xs';
+}
+---
+
+<SidebarCard title="标签" class={className}>
+    {
+        shown.length > 0 ? (
+            <div class="flex flex-wrap gap-2">
+                {shown.map((tag) => (
+                    <a
+                        class:list={[
+                            'border-main inline-flex items-baseline gap-1 rounded-full border px-2.5 py-0.5 leading-normal transition hover:underline hover:underline-offset-2',
+                            sizeClass(tag.count)
+                        ]}
+                        href={withBase(`/tags/${tag.id}/`)}
+                    >
+                        <span>{tag.name}</span>
+                        <span class="text-muted text-xs">{tag.count}</span>
+                    </a>
+                ))}
+            </div>
+        ) : (
+            <p class="text-muted">暂无标签</p>
+        )
+    }
+</SidebarCard>

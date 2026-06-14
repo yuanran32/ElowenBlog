@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import PostPreview from '../../components/PostPreview.astro';
+import TocCard from '../../components/TocCard.astro';
 import { getPublishedBlogPosts, getReadingTime } from '../../utils/data-utils';
 import { absoluteUrl, slugify, withBase } from '../../utils/common-utils';
 
@@ -114,18 +115,7 @@ const articleJsonLd = {
     {
         tableOfContents.length > 0 && (
             <aside class="mb-10 xl:fixed xl:top-24 xl:right-8 xl:mb-0 xl:w-56 xl:max-w-[calc(50%-22rem)]" aria-label="文章目录">
-                <nav class="border-main bg-muted max-h-[calc(100vh-7rem)] overflow-y-auto border border-dashed px-5 py-4 text-sm">
-                    <h2 class="mb-3 font-serif text-lg italic">目录</h2>
-                    <ol class="space-y-2">
-                        {tableOfContents.map((heading) => (
-                            <li class:list={[heading.depth === 3 && 'pl-4']}>
-                                <a class="hover:underline hover:underline-offset-2" href={`#${heading.slug}`}>
-                                    {heading.text}
-                                </a>
-                            </li>
-                        ))}
-                    </ol>
-                </nav>
+                <TocCard headings={tableOfContents} />
             </aside>
         )
     }
@@ -162,6 +152,50 @@ const articleJsonLd = {
         window.addEventListener('scroll', onScroll, { passive: true });
         onScroll();
     }
+    let tocObserver: IntersectionObserver | null = null;
+
+    function initTocSpy() {
+        const tocNav = document.querySelector<HTMLElement>('[data-toc-spy]');
+        if (!tocNav) return;
+
+        const links = Array.from(tocNav.querySelectorAll<HTMLAnchorElement>('a[data-toc-link]'));
+        if (links.length === 0) return;
+
+        const idToLink = new Map<string, HTMLAnchorElement>();
+        for (const link of links) {
+            const id = decodeURIComponent(link.hash.slice(1));
+            if (id) idToLink.set(id, link);
+        }
+
+        const headings = Array.from(document.querySelectorAll<HTMLElement>('article :is(h2, h3)')).filter((heading) => idToLink.has(heading.id));
+        if (headings.length === 0) return;
+
+        tocObserver?.disconnect();
+
+        let activeId = '';
+        const setActive = (id: string) => {
+            if (id === activeId) return;
+            activeId = id;
+            for (const link of links) link.classList.remove('toc-active');
+            idToLink.get(id)?.classList.add('toc-active');
+        };
+
+        tocObserver = new IntersectionObserver(
+            (entries) => {
+                const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+                if (visible.length > 0) setActive((visible[0].target as HTMLElement).id);
+            },
+            { rootMargin: '0px 0px -70% 0px', threshold: 0 }
+        );
+
+        for (const heading of headings) tocObserver.observe(heading);
+        setActive(headings[0].id);
+    }
+
     initBlogEnhancements();
-    document.addEventListener('astro:page-load', initBlogEnhancements);
+    initTocSpy();
+    document.addEventListener('astro:page-load', () => {
+        initBlogEnhancements();
+        initTocSpy();
+    });
 </script>

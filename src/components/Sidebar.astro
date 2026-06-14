@@ -1,0 +1,9 @@
+---
+type Props = { class?: string; sticky?: boolean };
+
+const { class: className, sticky = false } = Astro.props;
+---
+
+<aside class:list={['space-y-6', sticky && 'lg:sticky lg:top-24 lg:self-start', className]}>
+    <slot />
+</aside>

@@ -6,9 +6,9 @@ import Header from '../components/Header.astro';
 import Nav from '../components/Nav.astro';
 import { withBase } from '../utils/common-utils';
 
-export type Props = HeadProps & { showHeader?: boolean; mainClass?: string };
+export type Props = HeadProps & { showHeader?: boolean; mainClass?: string; containerClass?: string };
 
-const { showHeader = true, mainClass = 'mx-auto w-full max-w-3xl grow', ...head } = Astro.props;
+const { showHeader = true, mainClass = 'mx-auto w-full max-w-3xl grow', containerClass = 'max-w-3xl', ...head } = Astro.props;
 ---
 
 <!doctype html>
@@ -18,15 +18,17 @@ const { showHeader = true, mainClass = 'mx-auto w-full max-w-3xl grow', ...head 
         <ClientRouter />
         <script is:inline src={withBase('/theme-toggle.js')}></script>
         <script is:inline src={withBase('/code-copy.js')}></script>
+        <script is:inline src={withBase('/dot-grid.js')}></script>
     </head>
     <body class="bg-main text-main">
+        <canvas id="dot-grid" aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10"></canvas>
         <div class="flex min-h-screen flex-col px-4 md:px-8">
-            <Nav />
-            {showHeader && <Header />}
+            <Nav containerClass={containerClass} />
+            {showHeader && <Header containerClass={containerClass} />}
             <main class={mainClass}>
                 <slot />
             </main>
-            <Footer />
+            <Footer containerClass={containerClass} />
         </div>
     </body>
 </html>

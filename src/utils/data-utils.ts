@@ -59,6 +59,31 @@ export function getReadingTime(content?: string) {
     return Math.max(1, minutes);
 }
 
+export function countContentWords(content?: string) {
+    if (!content) return 0;
+
+    const words = content
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .trim();
+    const chineseChars = words.match(/[一-鿿]/g)?.length ?? 0;
+    const latinWords = words.match(/[a-zA-Z0-9]+/g)?.length ?? 0;
+
+    return chineseChars + latinWords;
+}
+
+export async function getBlogStats() {
+    const posts = await getPublishedBlogPosts();
+    const words = posts.reduce((total, post) => total + countContentWords(post.body), 0);
+
+    return {
+        posts: posts.length,
+        tags: getTagIndex(posts).length,
+        series: getSeriesIndex(posts).length,
+        words
+    };
+}
+
 export function getAllTags(posts: BlogPost[]) {
     return getTagIndex(posts).map(({ name, id }) => ({ name, id }));
 }

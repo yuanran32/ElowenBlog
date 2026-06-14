@@ -1,0 +1,21 @@
+---
+type Heading = { depth: number; slug: string; text: string };
+type Props = { headings: Heading[]; class?: string };
+
+const { headings, class: className } = Astro.props;
+---
+
+<nav class:list={['border-main bg-muted max-h-[calc(100vh-7rem)] overflow-y-auto border border-dashed px-5 py-4 text-sm', className]} data-toc-spy>
+    <h2 class="mb-3 font-serif text-lg italic">目录</h2>
+    <ol class="space-y-2">
+        {
+            headings.map((heading) => (
+                <li class:list={[heading.depth === 3 && 'pl-4']}>
+                    <a class="toc-link text-muted hover:text-main transition-colors hover:underline hover:underline-offset-2" data-toc-link href={`#${heading.slug}`}>
+                        {heading.text}
+                    </a>
+                </li>
+            ))
+        }
+    </ol>
+</nav>

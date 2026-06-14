@@ -3,10 +3,13 @@ import siteConfig from '../data/site-config';
 import { withBase } from '../utils/common-utils';
 import CustomImage from './CustomImage.astro';
 
+type Props = { containerClass?: string };
+
+const { containerClass = 'max-w-3xl' } = Astro.props;
 const titleClass = 'text-theme-foreground font-serif text-2xl leading-tight font-medium sm:text-3xl';
 ---
 
-<header class="mx-auto mb-12 flex w-full max-w-3xl items-center gap-4 sm:mb-16">
+<header class:list={['mx-auto mb-12 flex w-full items-center gap-4 sm:mb-16', containerClass]}>
     {
         siteConfig.avatar?.src && (
             <a href={withBase('/')}>

@@ -1,0 +1,32 @@
+---
+import SidebarCard from './SidebarCard.astro';
+
+type Props = { stats: { posts: number; tags: number; series: number; words: number }; class?: string };
+
+const { stats, class: className } = Astro.props;
+
+function formatWords(n: number) {
+    if (n >= 10000) return `${(n / 10000).toFixed(1)} 万`;
+    return n.toLocaleString('zh-CN');
+}
+
+const items = [
+    { label: '文章', value: String(stats.posts) },
+    { label: '标签', value: String(stats.tags) },
+    { label: '系列', value: String(stats.series) },
+    { label: '字数', value: formatWords(stats.words) }
+];
+---
+
+<SidebarCard title="统计" class={className}>
+    <dl class="grid grid-cols-2 gap-3">
+        {
+            items.map((item) => (
+                <div class="flex flex-col">
+                    <dt class="text-muted text-xs">{item.label}</dt>
+                    <dd class="font-serif text-xl leading-tight">{item.value}</dd>
+                </div>
+            ))
+        }
+    </dl>
+</SidebarCard>

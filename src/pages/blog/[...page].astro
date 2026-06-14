@@ -2,11 +2,15 @@
 import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry } from 'astro:content';
 import Pagination from '../../components/Pagination.astro';
-import PostPreview from '../../components/PostPreview.astro';
+import PostCard from '../../components/PostCard.astro';
+import RecentPostsCard from '../../components/RecentPostsCard.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import StatsCard from '../../components/StatsCard.astro';
 import Subscribe from '../../components/Subscribe.astro';
+import TagCloudCard from '../../components/TagCloudCard.astro';
 import siteConfig from '../../data/site-config';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPublishedBlogPosts } from '../../utils/data-utils';
+import { getBlogStats, getPublishedBlogPosts, getTagIndex } from '../../utils/data-utils';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     const posts = await getPublishedBlogPosts();
@@ -17,11 +21,33 @@ type Props = { page: Page<CollectionEntry<'blog'>> };
 
 const { page } = Astro.props;
 const blog = page.data;
+
+const allPosts = await getPublishedBlogPosts();
+const stats = await getBlogStats();
+const tagIndex = getTagIndex(allPosts);
+const recentPosts = allPosts.slice(0, 5);
 ---
 
-<BaseLayout title="博客" description="记录技术学习、项目实践和问题复盘。" showHeader={false}>
+<BaseLayout
+    title="博客"
+    description="记录技术学习、项目实践和问题复盘。"
+    showHeader={false}
+    containerClass="max-w-5xl"
+    mainClass="mx-auto w-full max-w-5xl grow"
+>
     <h1 class="mb-12 font-serif text-2xl leading-tight italic sm:mb-16 sm:text-4xl">文章归档</h1>
-    {blog.map((post) => <PostPreview post={post} class="mb-10 sm:mb-12" />)}
-    <Pagination page={page} class="my-16 sm:my-24" />
-    <Subscribe class="my-16 sm:my-24" />
+    <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-10">
+        <div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                {blog.map((post) => <PostCard post={post} />)}
+            </div>
+            <Pagination page={page} class="my-16 sm:my-24" />
+            <Subscribe class="my-16 sm:my-24" />
+        </div>
+        <Sidebar sticky class="mt-12 lg:mt-0">
+            <StatsCard stats={stats} />
+            <TagCloudCard tags={tagIndex} />
+            <RecentPostsCard posts={recentPosts} />
+        </Sidebar>
+    </div>
 </BaseLayout>

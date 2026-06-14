@@ -1,0 +1,27 @@
+---
+import { type CollectionEntry } from 'astro:content';
+import { withBase } from '../utils/common-utils';
+import FormattedDate from './FormattedDate.astro';
+import SidebarCard from './SidebarCard.astro';
+
+type Props = { posts: CollectionEntry<'blog'>[]; class?: string };
+
+const { posts, class: className } = Astro.props;
+---
+
+<SidebarCard title="近期文章" class={className}>
+    <ul class="space-y-3">
+        {
+            posts.map((post) => (
+                <li>
+                    <a class="leading-snug hover:underline hover:underline-offset-2" href={withBase(`/blog/${post.id}/`)}>
+                        {post.data.title}
+                    </a>
+                    <div class="text-muted mt-0.5 text-xs">
+                        <FormattedDate date={post.data.publishDate} />
+                    </div>
+                </li>
+            ))
+        }
+    </ul>
+</SidebarCard>
