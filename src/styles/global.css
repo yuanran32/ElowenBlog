@@ -8,18 +8,24 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    --text-main: #17210f;
-    --text-muted: #4f5d3f;
-    --bg-main: #eef7d8;
-    --bg-muted: #dceec0;
-    --border-main: #26351f;
+    --text-main: #18181a;
+    --text-muted: #71717a;
+    --bg-main: #ffffff;
+    --bg-muted: #f8f8f9;
+    --border-main: rgba(0, 0, 0, 0.08);
+    --accent-main: #c4956a;
+    --dot-color: rgba(0, 0, 0, 0.16);
+    --dot-color-hot: rgba(196, 149, 106, 0.9);
 }
 html.dark {
-    --text-main: #eef7d8;
-    --text-muted: #9aae7a;
-    --bg-main: #11180f;
-    --bg-muted: #1c2718;
-    --border-main: #b7db7d;
+    --text-main: #ebebeb;
+    --text-muted: #888888;
+    --bg-main: #0e0e0f;
+    --bg-muted: #141415;
+    --border-main: rgba(255, 255, 255, 0.06);
+    --accent-main: #d4a584;
+    --dot-color: rgba(255, 255, 255, 0.14);
+    --dot-color-hot: rgba(212, 165, 132, 0.95);
 }
 
 /* Cyan */
@@ -66,7 +72,7 @@ html.dark {
 
 @layer utilities {
     .toc-active {
-        color: var(--border-main);
+        color: var(--accent-main);
         font-weight: 600;
     }
 
