@@ -23,7 +23,7 @@ const { showHeader = true, mainClass = 'mx-auto w-full max-w-3xl grow', containe
     <body class="bg-main text-main">
         <canvas id="dot-grid" aria-hidden="true" class="dot-field pointer-events-none fixed inset-0 z-0"></canvas>
         <div class="relative z-10 flex min-h-screen flex-col px-4 md:px-8">
-            <Nav containerClass={containerClass} />
+            <Nav />
             {showHeader && <Header containerClass={containerClass} />}
             <main class={mainClass}>
                 <slot />

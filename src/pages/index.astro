@@ -1,15 +1,54 @@
 ---
 import Button from '../components/Button.astro';
-import Hero from '../components/Hero.astro';
 import PostPreview from '../components/PostPreview.astro';
 import ProjectPreview from '../components/ProjectPreview.astro';
 import siteConfig from '../data/site-config';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getFeaturedBlogPosts, getFeaturedProjects } from '../utils/data-utils';
+import { getAllProjects, getPublishedBlogPosts } from '../utils/data-utils';
+import { withBase } from '../utils/common-utils';
 
-const featuredPosts = await getFeaturedBlogPosts();
-const featuredProjects = await getFeaturedProjects();
+const publishedPosts = await getPublishedBlogPosts();
+const allProjects = await getAllProjects();
+const featuredPosts = publishedPosts.filter(({ data }) => data.isFeatured);
+const featuredProjects = allProjects.filter(({ data }) => data.isFeatured);
 const focusAreas = siteConfig.focusAreas ?? [];
+const githubLink = siteConfig.socialLinks?.find((link) => link.href.includes('github.com'));
+const githubLabel = githubLink?.href.split('/').filter(Boolean).pop() ?? githubLink?.text ?? 'GitHub';
+const heroStats = [
+    {
+        label: '项目',
+        value: `${allProjects.length}+`,
+        href: '/projects/'
+    },
+    {
+        label: '文章',
+        value: `${publishedPosts.length}+`,
+        href: '/blog/'
+    },
+    {
+        label: 'GitHub',
+        value: githubLabel,
+        href: githubLink?.href ?? 'https://github.com/yuanran32'
+    }
+];
+const heroActions = [
+    {
+        label: 'GitHub',
+        href: githubLink?.href ?? 'https://github.com/yuanran32',
+        icon: 'github',
+        external: true
+    },
+    {
+        label: '联系',
+        href: withBase('/contact/'),
+        icon: 'mail'
+    },
+    {
+        label: '简历',
+        href: withBase('/resume/'),
+        icon: 'file'
+    }
+];
 const homeJsonLd = [
     {
         '@context': 'https://schema.org',
@@ -30,12 +69,76 @@ const homeJsonLd = [
 ];
 ---
 
-<BaseLayout description={siteConfig.description} jsonLd={homeJsonLd}>
-    <Hero {...siteConfig.hero} />
-    <section class="mb-16 sm:mb-24">
-        <h2 class="mb-6 font-serif text-xl italic sm:text-2xl">当前关注</h2>
-        <div class="flex flex-wrap gap-3">
-            {focusAreas.map((area) => <span class="border-main bg-muted rounded-full border px-4 py-1.5 text-sm">{area}</span>)}
+<BaseLayout description={siteConfig.description} jsonLd={homeJsonLd} showHeader={false} containerClass="max-w-5xl" mainClass="mx-auto w-full max-w-5xl grow">
+    <section class="mx-auto flex min-h-[calc(100vh-10rem)] w-full max-w-3xl flex-col items-center justify-center px-2 pb-20 text-center sm:px-6">
+        <p class="mb-7 text-xs font-semibold text-muted uppercase sm:text-sm">Developer · Builder · Explorer</p>
+        <h1 class="font-serif text-5xl leading-none font-medium text-main sm:text-7xl md:text-8xl">{siteConfig.title}</h1>
+        {siteConfig.subtitle && <p class="mt-4 text-xl font-medium text-muted sm:text-2xl">{siteConfig.subtitle}</p>}
+        <p class="mt-6 max-w-[21rem] text-base leading-relaxed text-muted sm:max-w-2xl sm:text-lg">
+            记录前端开发、Web 工程化、项目复盘，以及学习过程中逐渐沉淀下来的实践经验。
+        </p>
+
+        <div class="mt-9 flex max-w-2xl flex-wrap justify-center gap-3">
+            {
+                focusAreas.slice(0, 3).map((area) => (
+                    <span class="border-main bg-main/70 inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium text-main">
+                        {area}
+                    </span>
+                ))
+            }
+        </div>
+
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted">
+            {
+                heroStats.map((stat) => {
+                    const href = stat.href.startsWith('http') ? stat.href : withBase(stat.href);
+                    return (
+                        <a
+                            href={href}
+                            target={stat.href.startsWith('http') ? '_blank' : undefined}
+                            rel={stat.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                            class="inline-flex items-baseline gap-2 transition hover:text-main"
+                        >
+                            <span class="font-serif text-xl text-main">{stat.value}</span>
+                            <span>{stat.label}</span>
+                        </a>
+                    );
+                })
+            }
+        </div>
+
+        <div class="mt-10 flex justify-center gap-3">
+            {
+                heroActions.map((action) => (
+                    <a
+                        href={action.href}
+                        target={action.external ? '_blank' : undefined}
+                        rel={action.external ? 'noopener noreferrer' : undefined}
+                        aria-label={action.label}
+                        class="border-main bg-main/70 hover:bg-muted flex h-11 w-11 items-center justify-center rounded-full border text-muted transition hover:text-main"
+                    >
+                        {action.icon === 'github' && (
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1-.02-1.97-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.18-1.49 3.14-1.18 3.14-1.18.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.13 0 1.54-.01 2.78-.01 3.16 0 .31.21.68.8.56C20.21 21.39 23.5 17.07 23.5 12 23.5 5.65 18.35.5 12 .5Z" />
+                            </svg>
+                        )}
+                        {action.icon === 'mail' && (
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <rect x="3" y="5" width="18" height="14" rx="2" />
+                                <path d="m3 7 9 6 9-6" />
+                            </svg>
+                        )}
+                        {action.icon === 'file' && (
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <path d="M14 2v6h6" />
+                                <path d="M8 13h8" />
+                                <path d="M8 17h5" />
+                            </svg>
+                        )}
+                    </a>
+                ))
+            }
         </div>
     </section>
     {
