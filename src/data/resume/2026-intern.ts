@@ -9,7 +9,7 @@ const version: ResumeVersion = {
         contactLinks: [
             { icon: 'mail', label: '邮箱', value: '3916048194@qq.com', href: 'mailto:3916048194@qq.com' },
             { icon: 'github', label: 'GitHub', value: 'yuanran32', href: 'https://github.com/yuanran32' },
-            { icon: 'globe', label: '博客', value: 'yuanran32.github.io/myBlog', href: 'https://yuanran32.github.io/myBlog/' }
+            { icon: 'globe', label: '博客', value: 'elowen-blog.vercel.app', href: 'https://elowen-blog.vercel.app/' }
         ],
         skills: [
             '深入理解事件循环、浏览器渲染等前端核心原理',
@@ -28,7 +28,7 @@ const version: ResumeVersion = {
                 highlights: [
                     '负责博客站点的页面配置、内容管理和部署流程',
                     '使用 Markdown 管理文章内容，支持标签、分页、系列和 SEO 信息',
-                    '配置站点地图、RSS 和基础 SEO 元信息，适配 GitHub Pages 部署'
+                    '配置站点地图、RSS 和基础 SEO 元信息，适配 Vercel 部署'
                 ]
             },
             {

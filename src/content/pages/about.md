@@ -20,7 +20,7 @@ seo:
 
 ## 关于这个博客
 
-这个博客基于 Astro 5 + Tailwind CSS v4 搭建，内容使用 Markdown 管理，部署在 GitHub Pages 上。
+这个博客基于 Astro 5 + Tailwind CSS v4 搭建，内容使用 Markdown 管理，部署在 Vercel 上。
 
 这里会记录：
 
@@ -36,4 +36,4 @@ seo:
 - 代码示例力求可运行、可复现
 - 保持诚实，踩过的坑不回避
 
-如果你对文章内容有疑问或想法，欢迎通过 [联系页面](/myBlog/contact/) 找到我。
+如果你对文章内容有疑问或想法，欢迎通过 [联系页面](/contact/) 找到我。

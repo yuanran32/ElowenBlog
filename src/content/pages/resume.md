@@ -10,7 +10,7 @@ seo:
 姓名：Elowen  
 邮箱：3916048194@qq.com  
 GitHub：https://github.com/yuanran32  
-博客：https://yuanran32.github.io/myBlog
+博客：https://elowen-blog.vercel.app
 
 ## 求职方向
 

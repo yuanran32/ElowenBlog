@@ -8,13 +8,13 @@ techStack:
   - Tailwind CSS v4
   - TypeScript
   - Markdown / MDX
-demoUrl: 'https://yuanran32.github.io/myBlog/'
+demoUrl: 'https://elowen-blog.vercel.app/'
 githubUrl: 'https://github.com/yuanran32/myBlog'
 role: 独立开发
 highlights:
   - 基于 Content Collections 的类型安全内容管理
   - Tailwind CSS v4 + CSS 变量实现亮色/暗色主题切换
-  - 适配 GitHub Pages 项目页的 base path 部署方案
+  - 适配 Vercel 根路径部署方案
   - View Transitions 页面切换动画
   - 自动生成 RSS、Sitemap 和结构化数据
 seo:
@@ -34,7 +34,7 @@ seo:
 
 **路由设计**：文件系统路由 + 动态分页，支持按标签和系列筛选文章。
 
-**部署方案**：GitHub Pages 项目页部署，封装 `withBase()` 工具函数统一处理路径前缀，避免资源 404。
+**部署方案**：Vercel 静态站点部署，保留 `withBase()` 工具函数统一处理路径，避免不同部署环境下的资源路径问题。
 
 **SEO**：每个页面生成 canonical URL、Open Graph / Twitter Card 元标签和 JSON-LD 结构化数据。
 

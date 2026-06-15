@@ -1,8 +1,21 @@
 import avatar from '../assets/images/avatar.jpg';
 import type { SiteConfig } from '../types';
 
+function normalizeSiteUrl(url?: string) {
+    if (!url) return undefined;
+
+    const siteUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    return siteUrl.replace(/\/$/, '');
+}
+
+const website =
+    normalizeSiteUrl(process.env.SITE_URL) ??
+    normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ??
+    normalizeSiteUrl(process.env.VERCEL_URL) ??
+    'https://elowen-blog.vercel.app';
+
 const siteConfig: SiteConfig = {
-    website: 'https://yuanran32.github.io/myBlog',
+    website,
     avatar: {
         src: avatar,
         alt: 'Elowen'
