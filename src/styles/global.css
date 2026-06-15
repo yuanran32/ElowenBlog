@@ -8,23 +8,23 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    --text-main: #18181a;
-    --text-muted: #71717a;
-    --bg-main: #ffffff;
-    --bg-muted: #f8f8f9;
-    --border-main: rgba(0, 0, 0, 0.08);
-    --accent-main: #c4956a;
-    --dot-color: rgba(0, 0, 0, 0.16);
-    --dot-color-hot: rgba(196, 149, 106, 0.9);
+    --text-main: #2d2520;
+    --text-muted: #7a7068;
+    --bg-main: #faf7f3;
+    --bg-muted: #f3ede6;
+    --border-main: rgba(0, 0, 0, 0.07);
+    --accent-main: #b8845a;
+    --dot-color: rgba(0, 0, 0, 0.12);
+    --dot-color-hot: rgba(184, 132, 90, 0.9);
 }
 html.dark {
-    --text-main: #ebebeb;
-    --text-muted: #8b8b92;
-    --bg-main: #161618;
-    --bg-muted: #1e1e20;
-    --border-main: rgba(255, 255, 255, 0.08);
+    --text-main: #e8e4e0;
+    --text-muted: #9a948e;
+    --bg-main: #1c1a18;
+    --bg-muted: #242220;
+    --border-main: rgba(255, 255, 255, 0.07);
     --accent-main: #d4a584;
-    --dot-color: rgba(255, 255, 255, 0.1);
+    --dot-color: rgba(255, 255, 255, 0.08);
     --dot-color-hot: rgba(212, 165, 132, 0.95);
 }
 
