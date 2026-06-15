@@ -35,7 +35,42 @@
     }
 
     function parseRGBA(value) {
-        const match = value.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
+        // Hex with alpha: #rrggbbaa or #rgba
+        var hexMatch = value.match(/^#([0-9a-fA-F]{3,8})$/);
+        if (hexMatch) {
+            var h = hexMatch[1];
+            var r, g, b, a = 1;
+            if (h.length === 3) {
+                r = parseInt(h[0] + h[0], 16);
+                g = parseInt(h[1] + h[1], 16);
+                b = parseInt(h[2] + h[2], 16);
+            } else if (h.length === 4) {
+                r = parseInt(h[0] + h[0], 16);
+                g = parseInt(h[1] + h[1], 16);
+                b = parseInt(h[2] + h[2], 16);
+                a = parseInt(h[3] + h[3], 16) / 255;
+            } else if (h.length === 6) {
+                r = parseInt(h.substring(0, 2), 16);
+                g = parseInt(h.substring(2, 4), 16);
+                b = parseInt(h.substring(4, 6), 16);
+            } else {
+                r = parseInt(h.substring(0, 2), 16);
+                g = parseInt(h.substring(2, 4), 16);
+                b = parseInt(h.substring(4, 6), 16);
+                a = parseInt(h.substring(6, 8), 16) / 255;
+            }
+            return [r, g, b, a];
+        }
+
+        // Modern rgb() / rgba() with alpha as percentage
+        var modMatch = value.match(/rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)\s*\/\s*([\d.]+)\)/);
+        if (modMatch) {
+            var pct = parseFloat(modMatch[4]);
+            return [parseInt(modMatch[1], 10), parseInt(modMatch[2], 10), parseInt(modMatch[3], 10), pct > 1 ? pct / 100 : pct];
+        }
+
+        // Legacy rgba(r, g, b, a) or rgb(r, g, b)
+        var match = value.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
         if (!match) return [0, 0, 0, 1];
         return [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10), match[4] ? parseFloat(match[4]) : 1];
     }
