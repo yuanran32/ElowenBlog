@@ -37,21 +37,11 @@
     function parseRGBA(value) {
         const match = value.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
         if (!match) return [0, 0, 0, 1];
-        return [
-            parseInt(match[1], 10),
-            parseInt(match[2], 10),
-            parseInt(match[3], 10),
-            match[4] ? parseFloat(match[4]) : 1,
-        ];
+        return [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10), match[4] ? parseFloat(match[4]) : 1];
     }
 
     function mixRGB(a, b, t) {
-        return [
-            Math.round(a[0] + (b[0] - a[0]) * t),
-            Math.round(a[1] + (b[1] - a[1]) * t),
-            Math.round(a[2] + (b[2] - a[2]) * t),
-            a[3] + (b[3] - a[3]) * t,
-        ];
+        return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t), a[3] + (b[3] - a[3]) * t];
     }
 
     function withAlpha(rgb, multiplier) {
@@ -82,7 +72,7 @@
                     dispX: 0,
                     dispY: 0,
                     glyph: Math.random() < 0.5 ? '+' : '−',
-                    bp: Math.random() * Math.PI * 2,
+                    bp: Math.random() * Math.PI * 2
                 });
             }
         }

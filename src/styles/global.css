@@ -83,8 +83,13 @@ html.dark {
     }
 
     @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
     }
 
     .prose {
@@ -118,7 +123,7 @@ html.dark {
     }
 
     .prose :where(:not(pre) > code) {
-        @apply font-medium text-[0.95em];
+        @apply text-[0.95em] font-medium;
     }
 
     .prose :where(:not(pre) > code)::before,

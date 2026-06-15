@@ -56,10 +56,10 @@ const blog = defineCollection({
     title: z.string(),
     publishDate: z.coerce.date(),
     tags: z.array(z.string()).default([]),
-    series: z.string().optional(),
+    series: z.string().optional()
     // ...
   })
-})
+});
 ```
 
 这套方案的好处是 frontmatter 有 Zod schema 校验，写错字段名或类型会在构建时报错，比运行时才发现问题要好得多。
@@ -72,9 +72,9 @@ const blog = defineCollection({
 
 ```typescript
 export function withBase(path: string): string {
-  const base = import.meta.env.BASE_URL
-  if (path.startsWith('http') || path.startsWith(base)) return path
-  return base + path.replace(/^\//, '')
+  const base = import.meta.env.BASE_URL;
+  if (path.startsWith('http') || path.startsWith(base)) return path;
+  return base + path.replace(/^\//, '');
 }
 ```
 

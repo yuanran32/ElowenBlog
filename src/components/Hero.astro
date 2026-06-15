@@ -15,9 +15,10 @@ const { title, image, text, actions } = Astro.props;
             {title && (
                 <div>
                     <h1 class="hero-title font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">
-                        <span class="hero-title-text">{title}</span><span class="hero-cursor">|</span>
+                        <span class="hero-title-text">{title}</span>
+                        <span class="hero-cursor">|</span>
                     </h1>
-                    <p class="hero-greeting mt-3 text-sm opacity-0 transition-opacity duration-700 sm:text-base"></p>
+                    <p class="hero-greeting mt-3 text-sm opacity-0 transition-opacity duration-700 sm:text-base" />
                 </div>
             )}
             {image?.src && (

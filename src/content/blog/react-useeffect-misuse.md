@@ -35,9 +35,7 @@ function ProductList({ products, keyword }: Props) {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    setFilteredProducts(
-      products.filter((product) => product.name.includes(keyword))
-    );
+    setFilteredProducts(products.filter((product) => product.name.includes(keyword)));
   }, [products, keyword]);
 
   return (
@@ -58,9 +56,7 @@ function ProductList({ products, keyword }: Props) {
 
 ```tsx
 function ProductList({ products, keyword }: Props) {
-  const filteredProducts = products.filter((product) =>
-    product.name.includes(keyword)
-  );
+  const filteredProducts = products.filter((product) => product.name.includes(keyword));
 
   return (
     <ul>
@@ -100,12 +96,7 @@ function ProfileForm({ user }: { user: User }) {
     setName(user.name);
   }, [user]);
 
-  return (
-    <input
-      value={name}
-      onChange={(event) => setName(event.target.value)}
-    />
-  );
+  return <input value={name} onChange={(event) => setName(event.target.value)} />;
 }
 ```
 
@@ -133,12 +124,7 @@ function ProfilePage({ user }: { user: User }) {
 function ProfileForm({ user }: { user: User }) {
   const [name, setName] = useState(user.name);
 
-  return (
-    <input
-      value={name}
-      onChange={(event) => setName(event.target.value)}
-    />
-  );
+  return <input value={name} onChange={(event) => setName(event.target.value)} />;
 }
 ```
 
@@ -161,11 +147,7 @@ function SaveButton({ form }: Props) {
     setShouldSubmit(false);
   }, [shouldSubmit, form]);
 
-  return (
-    <button onClick={() => setShouldSubmit(true)}>
-      保存
-    </button>
-  );
+  return <button onClick={() => setShouldSubmit(true)}>保存</button>;
 }
 ```
 
@@ -293,10 +275,7 @@ function SearchPage() {
 
   return (
     <>
-      <input
-        value={keyword}
-        onChange={(event) => setKeyword(event.target.value)}
-      />
+      <input value={keyword} onChange={(event) => setKeyword(event.target.value)} />
       <button onClick={() => setQuery(keyword)}>搜索</button>
 
       {items.map((item) => (

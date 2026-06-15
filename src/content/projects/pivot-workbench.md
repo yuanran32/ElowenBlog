@@ -22,4 +22,3 @@ seo:
   title: 个人博客项目
   description: 基于 Astro 5 和 Tailwind CSS v4 的个人技术博客，支持内容集合、主题切换和 SEO 优化。
 ---
-
