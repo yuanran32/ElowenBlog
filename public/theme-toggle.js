@@ -22,16 +22,9 @@
         }
     }
 
-    function getSystemTheme() {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
-        return 'light';
-    }
-
     function getActiveTheme() {
         const stored = getStoredTheme();
-        return stored || getSystemTheme();
+        return stored || 'light';
     }
 
     function applyTheme(theme) {
