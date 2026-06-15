@@ -24,7 +24,7 @@ html.dark {
     --bg-muted: #1e1e20;
     --border-main: rgba(255, 255, 255, 0.08);
     --accent-main: #d4a584;
-    --dot-color: rgba(255, 255, 255, 0.10);
+    --dot-color: rgba(255, 255, 255, 0.1);
     --dot-color-hot: rgba(212, 165, 132, 0.95);
 }
 
