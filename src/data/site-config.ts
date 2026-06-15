@@ -8,7 +8,7 @@ function normalizeSiteUrl(url?: string) {
     return siteUrl.replace(/\/$/, '');
 }
 
-const website = normalizeSiteUrl(process.env.SITE_URL) ?? 'https://yuanran32.github.io/ElowenBlog';
+const website = normalizeSiteUrl(process.env.SITE_URL) ?? 'http://localhost:4321';
 
 const siteConfig: SiteConfig = {
     website,

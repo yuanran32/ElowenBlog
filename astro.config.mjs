@@ -7,7 +7,6 @@ import siteConfig from './src/data/site-config';
 // https://astro.build/config
 export default defineConfig({
     site: siteConfig.website,
-    base: '/ElowenBlog',
     vite: {
         plugins: [tailwindcss()]
     },
