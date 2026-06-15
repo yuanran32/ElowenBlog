@@ -39,7 +39,10 @@
         var hexMatch = value.match(/^#([0-9a-fA-F]{3,8})$/);
         if (hexMatch) {
             var h = hexMatch[1];
-            var r, g, b, a = 1;
+            var r,
+                g,
+                b,
+                a = 1;
             if (h.length === 3) {
                 r = parseInt(h[0] + h[0], 16);
                 g = parseInt(h[1] + h[1], 16);
