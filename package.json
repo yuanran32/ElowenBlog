@@ -2,6 +2,7 @@
     "name": "elowen-blog",
     "type": "module",
     "version": "1.0.0",
+    "packageManager": "pnpm@10.31.0",
     "scripts": {
         "dev": "astro dev",
         "start": "astro dev",
