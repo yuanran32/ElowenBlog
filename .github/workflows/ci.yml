@@ -40,7 +40,15 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
         runs-on: ubuntu-latest
-        environment: production
+
+        permissions:
+            contents: read
+            pages: write
+            id-token: write
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deploy.outputs.page_url }}
 
         steps:
             - name: Checkout
@@ -58,8 +66,17 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Deploy to Vercel
-              run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd .
-              env:
-                  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-                  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+            - name: Build site
+              run: pnpm run build
+
+            - name: Setup Pages
+              uses: actions/configure-pages@v5
+
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./dist
+
+            - name: Deploy to GitHub Pages
+              id: deploy
+              uses: actions/deploy-pages@v4

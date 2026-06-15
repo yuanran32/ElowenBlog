@@ -10,9 +10,7 @@ function normalizeSiteUrl(url?: string) {
 
 const website =
     normalizeSiteUrl(process.env.SITE_URL) ??
-    normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ??
-    normalizeSiteUrl(process.env.VERCEL_URL) ??
-    'https://elowen-blog.vercel.app';
+    'https://yuanran32.github.io/ElowenBlog';
 
 const siteConfig: SiteConfig = {
     website,
