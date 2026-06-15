@@ -19,12 +19,12 @@
 }
 html.dark {
     --text-main: #ebebeb;
-    --text-muted: #888888;
-    --bg-main: #0e0e0f;
-    --bg-muted: #141415;
-    --border-main: rgba(255, 255, 255, 0.06);
+    --text-muted: #8b8b92;
+    --bg-main: #161618;
+    --bg-muted: #1e1e20;
+    --border-main: rgba(255, 255, 255, 0.08);
     --accent-main: #d4a584;
-    --dot-color: rgba(255, 255, 255, 0.14);
+    --dot-color: rgba(255, 255, 255, 0.10);
     --dot-color-hot: rgba(212, 165, 132, 0.95);
 }
 
