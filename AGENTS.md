@@ -16,7 +16,7 @@ There is currently no test runner configured in `package.json`; use `pnpm build`
 
 ## Architecture
 
-This is an Astro 5 static personal blog hosted under the `/myBlog` base path. The canonical site URL, navigation, hero copy, pagination sizes, social links, and default SEO image live in `src/data/site-config.ts`; `astro.config.mjs` imports this config for `site` and sets `base: '/myBlog'`.
+This is an Astro 5 static personal blog deployed at `https://elowenblog.personal.asynclab.club/`. The canonical site URL, navigation, hero copy, pagination sizes, social links, and default SEO image live in `src/data/site-config.ts`; `astro.config.mjs` imports this config for `site`, and the site is served from the domain root.
 
 Content is managed with Astro content collections in `src/content.config.ts`:
 
@@ -33,7 +33,7 @@ Routing is file-based under `src/pages`:
 - `[...id].astro` renders generic content pages, except `page.id === 'resume'`, which uses `src/components/ResumePage.astro` instead of the Markdown body.
 - `rss.xml.js` generates RSS from published blog posts.
 
-`src/layouts/BaseLayout.astro` wraps all pages with `BaseHead`, `Nav`, optional `Header`, the page slot, and `Footer`. It also loads global theme and copy scripts from `public/` through `withBase()`. Use `withBase()` from `src/utils/common-utils.ts` for internal URLs/assets that must work with the `/myBlog` base path.
+`src/layouts/BaseLayout.astro` wraps all pages with `BaseHead`, `Nav`, optional `Header`, the page slot, and `Footer`. It also loads global theme and copy scripts from `public/` through `withBase()`. Use `withBase()` from `src/utils/common-utils.ts` for internal URLs/assets that need to respect `BASE_URL`.
 
 `src/components/BaseHead.astro` centralizes metadata, canonical URLs, Open Graph/Twitter tags, font preloads, RSS/sitemap links, and JSON-LD serialization. Page components pass SEO overrides through `BaseLayout`; default metadata comes from `siteConfig`.
 

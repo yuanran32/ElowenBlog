@@ -8,7 +8,7 @@ function normalizeSiteUrl(url?: string) {
     return siteUrl.replace(/\/$/, '');
 }
 
-const website = normalizeSiteUrl(process.env.SITE_URL) ?? 'http://localhost:4321';
+const website = normalizeSiteUrl(process.env.SITE_URL) ?? 'https://elowenblog.personal.asynclab.club';
 
 const siteConfig: SiteConfig = {
     website,

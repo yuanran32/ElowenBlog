@@ -45,4 +45,6 @@ pnpm run preview
 
 ## 说明
 
-这里可以补充博客的介绍、部署地址、技术栈和后续计划。
+- 线上地址：https://elowenblog.personal.asynclab.club/
+
+这里可以继续补充博客的介绍、技术栈和后续计划。
