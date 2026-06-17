@@ -1,0 +1,14 @@
+---
+import TerminalWidget from '../components/TerminalWidget.astro';
+import siteConfig from '../data/site-config';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Terminal';
+const description = `Interactive blog terminal for ${siteConfig.title}.`;
+---
+
+<BaseLayout title={title} description={description} containerClass="max-w-5xl" mainClass="mx-auto w-full max-w-5xl grow">
+    <div class="py-8 sm:py-12">
+        <TerminalWidget />
+    </div>
+</BaseLayout>

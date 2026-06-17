@@ -1,0 +1,294 @@
+---
+import siteConfig from '../data/site-config';
+import { withBase } from '../utils/common-utils';
+import { createPostDescription, getAllProjects, getPublishedBlogPosts, getTagIndex } from '../utils/data-utils';
+
+const posts = await getPublishedBlogPosts();
+const projects = await getAllProjects();
+const tags = getTagIndex(posts);
+const githubLink = siteConfig.socialLinks?.find((link) => link.href.includes('github.com'));
+
+const terminalData = {
+    site: {
+        title: siteConfig.title,
+        subtitle: siteConfig.subtitle,
+        description: siteConfig.description
+    },
+    posts: posts.slice(0, 5).map((post) => ({
+        title: post.data.title,
+        date: post.data.publishDate.toISOString().slice(0, 10),
+        description: createPostDescription(post),
+        href: withBase(`/blog/${post.id}/`)
+    })),
+    projects: projects.slice(0, 5).map((project) => ({
+        title: project.data.title,
+        description: project.data.description ?? '',
+        href: withBase(`/projects/${project.id}/`)
+    })),
+    tags: tags.slice(0, 12).map((tag) => ({
+        name: tag.name,
+        count: tag.count,
+        href: withBase(`/tags/${tag.id}/`)
+    })),
+    routes: {
+        blog: withBase('/blog/'),
+        posts: withBase('/blog/'),
+        projects: withBase('/projects/'),
+        resume: withBase('/resume/'),
+        about: withBase('/about/'),
+        contact: withBase('/contact/'),
+        tags: withBase('/tags/'),
+        github: githubLink?.href ?? 'https://github.com/yuanran32'
+    }
+};
+---
+
+<section class="mx-auto mb-16 w-full max-w-4xl px-2 sm:mb-24 sm:px-6" aria-labelledby="terminal-heading">
+    <div class="mb-5 flex items-end justify-between gap-4">
+        <div>
+            <p class="text-muted mb-2 text-xs font-semibold tracking-[0.18em] uppercase">Interactive Shell</p>
+            <h2 id="terminal-heading" class="font-serif text-2xl leading-tight font-medium sm:text-3xl">Blog Terminal</h2>
+        </div>
+        <span class="border-main text-muted hidden rounded-full border px-3 py-1 text-xs sm:inline-flex">guest mode</span>
+    </div>
+
+    <div class="border-main bg-main/90 overflow-hidden rounded-lg border shadow-sm backdrop-blur" data-terminal>
+        <div class="border-main bg-muted/70 flex items-center gap-3 border-b px-4 py-3">
+            <div class="flex gap-2" aria-hidden="true">
+                <span class="h-3 w-3 rounded-full bg-[#e06c75]"></span>
+                <span class="h-3 w-3 rounded-full bg-[#e5c07b]"></span>
+                <span class="h-3 w-3 rounded-full bg-[#98c379]"></span>
+            </div>
+            <p class="text-muted truncate font-mono text-xs">guest@elowen:~/blog</p>
+        </div>
+
+        <div
+            class="min-h-72 overflow-y-auto px-4 py-4 font-mono text-sm leading-6 sm:min-h-80 sm:px-5"
+            data-terminal-output
+            role="log"
+            aria-live="polite"
+            aria-label="Terminal output"
+        >
+        </div>
+
+        <form class="border-main flex items-center gap-2 border-t px-4 py-3 font-mono text-sm sm:px-5" data-terminal-form>
+            <label class="sr-only" for="terminal-command">Command</label>
+            <span class="text-muted shrink-0">guest@elowen:~/blog$</span>
+            <input
+                id="terminal-command"
+                class="text-main min-w-0 flex-1 bg-transparent outline-none placeholder:text-[color:var(--text-muted)]"
+                data-terminal-input
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="help"
+            />
+        </form>
+    </div>
+</section>
+
+<script is:inline define:vars={{ terminalData }}>
+    const root = document.querySelector('[data-terminal]');
+    const output = root?.querySelector('[data-terminal-output]');
+    const form = root?.querySelector('[data-terminal-form]');
+    const commandInput = root?.querySelector('[data-terminal-input]');
+
+    if (!root || !output || !form || !commandInput) {
+        throw new Error('Terminal widget failed to initialize.');
+    }
+
+    const commandHistory = [];
+    let historyIndex = 0;
+
+    const createLine = (text = '', className = 'text-main') => {
+        const line = document.createElement('div');
+        line.className = className;
+        line.textContent = text;
+        return line;
+    };
+
+    const createLinkLine = ({ label, href, detail }) => {
+        const line = document.createElement('div');
+        line.className = 'text-muted flex flex-col gap-0.5 py-1 sm:flex-row sm:items-baseline sm:gap-2';
+
+        const link = document.createElement('a');
+        link.className = 'text-main underline decoration-dashed underline-offset-4 transition hover:decoration-solid';
+        link.href = href;
+        link.textContent = label;
+
+        const meta = document.createElement('span');
+        meta.className = 'text-muted';
+        meta.textContent = detail ?? '';
+
+        line.append(link);
+        if (detail) line.append(meta);
+        return line;
+    };
+
+    const scrollToBottom = () => {
+        output.scrollTop = output.scrollHeight;
+    };
+
+    const appendPrompt = (command) => {
+        const line = document.createElement('div');
+        line.className = 'text-main mt-3 flex gap-2';
+
+        const prompt = document.createElement('span');
+        prompt.className = 'text-muted shrink-0';
+        prompt.textContent = '>';
+
+        const value = document.createElement('span');
+        value.className = 'break-all';
+        value.textContent = command;
+
+        line.append(prompt, value);
+        output.append(line);
+    };
+
+    const appendEntries = (entries) => {
+        const fragment = document.createDocumentFragment();
+
+        for (const entry of entries) {
+            if (typeof entry === 'string') {
+                fragment.append(createLine(entry));
+                continue;
+            }
+
+            if (entry.type === 'muted') {
+                fragment.append(createLine(entry.text, 'text-muted'));
+                continue;
+            }
+
+            if (entry.type === 'link') {
+                fragment.append(createLinkLine(entry));
+            }
+        }
+
+        output.append(fragment);
+        scrollToBottom();
+    };
+
+    const routeLabels = {
+        blog: 'blog',
+        posts: 'posts',
+        projects: 'projects',
+        resume: 'resume',
+        about: 'about',
+        contact: 'contact',
+        tags: 'tags',
+        github: 'github'
+    };
+
+    const commandHandlers = {
+        help: () => [
+            'available commands',
+            { type: 'muted', text: 'about          show profile summary' },
+            { type: 'muted', text: 'posts          list recent posts' },
+            { type: 'muted', text: 'projects       list selected projects' },
+            { type: 'muted', text: 'tags           list popular tags' },
+            { type: 'muted', text: 'open <target>  open blog/projects/resume/about/contact/tags/github' },
+            { type: 'muted', text: 'clear          clear terminal' }
+        ],
+        about: () => [terminalData.site.title, { type: 'muted', text: terminalData.site.subtitle }, { type: 'muted', text: terminalData.site.description }],
+        posts: () =>
+            terminalData.posts.length
+                ? terminalData.posts.map((post) => ({
+                      type: 'link',
+                      label: post.title,
+                      href: post.href,
+                      detail: `${post.date}  ${post.description}`
+                  }))
+                : ['no posts found'],
+        projects: () =>
+            terminalData.projects.length
+                ? terminalData.projects.map((project) => ({
+                      type: 'link',
+                      label: project.title,
+                      href: project.href,
+                      detail: project.description
+                  }))
+                : ['no projects found'],
+        tags: () =>
+            terminalData.tags.length
+                ? terminalData.tags.map((tag) => ({
+                      type: 'link',
+                      label: `#${tag.name}`,
+                      href: tag.href,
+                      detail: `${tag.count} posts`
+                  }))
+                : ['no tags found'],
+        ls: () => ['about', 'posts', 'projects', 'tags', 'resume', 'contact'],
+        pwd: () => ['~/blog'],
+        whoami: () => ['guest']
+    };
+
+    const routes = terminalData.routes;
+
+    const runCommand = (rawCommand) => {
+        const command = rawCommand.trim().replace(/\s+/g, ' ');
+        const normalized = command.toLowerCase();
+        if (!command) return;
+
+        appendPrompt(command);
+
+        if (normalized === 'clear') {
+            output.replaceChildren();
+            return;
+        }
+
+        if (normalized.startsWith('open ')) {
+            const target = normalized.slice(5);
+            const href = routes[target];
+
+            if (!href) {
+                appendEntries([{ type: 'muted', text: `unknown target: ${target}` }]);
+                return;
+            }
+
+            appendEntries([{ type: 'muted', text: `opening ${routeLabels[target] ?? target}...` }]);
+            if (/^https?:\/\//i.test(href)) {
+                window.open(href, '_blank', 'noopener,noreferrer');
+            } else {
+                window.location.href = href;
+            }
+            return;
+        }
+
+        const handler = commandHandlers[normalized];
+        appendEntries(handler ? handler() : [{ type: 'muted', text: `command not found: ${command}. try "help".` }]);
+    };
+
+    const resetHistoryCursor = () => {
+        historyIndex = commandHistory.length;
+    };
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const command = commandInput.value;
+        commandInput.value = '';
+
+        if (command.trim()) {
+            commandHistory.push(command);
+            resetHistoryCursor();
+        }
+
+        runCommand(command);
+    });
+
+    commandInput.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            historyIndex = Math.max(0, historyIndex - 1);
+            commandInput.value = commandHistory[historyIndex] ?? '';
+            return;
+        }
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            historyIndex = Math.min(commandHistory.length, historyIndex + 1);
+            commandInput.value = commandHistory[historyIndex] ?? '';
+        }
+    });
+
+    appendEntries([`${terminalData.site.title} shell ready.`, { type: 'muted', text: 'type "help" and press enter' }]);
+</script>
