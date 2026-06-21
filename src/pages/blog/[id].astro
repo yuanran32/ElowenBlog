@@ -62,81 +62,94 @@ const articleJsonLd = {
     image={seo?.image}
     pageType="article"
     showHeader={false}
-    mainClass="mx-auto w-full max-w-3xl grow lg:relative"
+    mainClass="mx-auto w-full max-w-6xl grow"
     jsonLd={articleJsonLd}
 >
     <div class="reading-progress fixed top-0 left-0 z-50 h-0.5 bg-current transition-[width] duration-100" style="width: 0%"></div>
-    <article class="mb-16 sm:mb-24">
-        <header class="mb-8">
-            <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">{title}</h1>
-            <div class="mt-4 text-sm">
-                {draft && <span class="mr-2">草稿</span>}
-                <FormattedDate date={publishDate} />
-                <span> · {readingTime} 分钟阅读</span>
+    <div class="lg:grid lg:grid-cols-[minmax(0,45rem)_12rem] lg:items-start lg:justify-center lg:gap-10 xl:grid-cols-[minmax(0,48rem)_14rem] xl:gap-16">
+        <div class="min-w-0 lg:col-start-1">
+            <article class="mb-16 sm:mb-24">
+                <header class="mb-8">
+                    <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+                    <div class="mt-4 text-sm">
+                        {draft && <span class="mr-2">草稿</span>}
+                        <FormattedDate date={publishDate} />
+                        <span> · {readingTime} 分钟阅读</span>
+                        {
+                            updatedDate && (
+                                <>
+                                    {' '}
+                                    <span>
+                                        (更新于 <FormattedDate date={updatedDate} />)
+                                    </span>
+                                </>
+                            )
+                        }
+                    </div>
+                    {
+                        (series || tags.length > 0) && (
+                            <div class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                                {series && <span>系列：{series}</span>}
+                                {tags.map((tag) => (
+                                    <a class="text-main hover:underline" href={withBase(`/tags/${slugify(tag)}/`)}>
+                                        #{tag}
+                                    </a>
+                                ))}
+                            </div>
+                        )
+                    }
+                </header>
                 {
-                    updatedDate && (
-                        <>
-                            {' '}
-                            <span>
-                                (更新于 <FormattedDate date={updatedDate} />)
-                            </span>
-                        </>
+                    cover && (
+                        <figure class="border-main/20 mb-8 overflow-hidden rounded-2xl border">
+                            <CustomImage
+                                class="aspect-[16/9] w-full object-cover"
+                                src={cover}
+                                alt={title}
+                                width={1200}
+                                height={675}
+                                widths={[640, 960, 1200]}
+                                sizes="(min-width: 1024px) 48rem, 100vw"
+                                loading="eager"
+                                fetchpriority="high"
+                            />
+                        </figure>
                     )
                 }
-            </div>
+                {
+                    tableOfContents.length > 0 && (
+                        <aside class="mb-8 lg:hidden" aria-label="文章目录">
+                            <TocCard headings={tableOfContents} />
+                        </aside>
+                    )
+                }
+                <div class="prose sm:prose-lg max-w-none">
+                    <Content />
+                </div>
+                <div class="mt-8 flex justify-end text-sm sm:mt-12 sm:text-base">
+                    <Button class="copy-url-button" aria-label="复制链接" data-url={href} data-tooltip-default="复制链接" data-tooltip-success="已复制"
+                        >分享</Button
+                    >
+                </div>
+            </article>
             {
-                (series || tags.length > 0) && (
-                    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                        {series && <span>系列：{series}</span>}
-                        {tags.map((tag) => (
-                            <a class="text-main hover:underline" href={withBase(`/tags/${slugify(tag)}/`)}>
-                                #{tag}
-                            </a>
-                        ))}
+                (prevPost || nextPost) && (
+                    <div class="my-16 sm:my-24">
+                        <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">继续阅读</h2>
+                        {nextPost && <PostPreview post={nextPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
+                        {prevPost && <PostPreview post={prevPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
                     </div>
                 )
             }
-        </header>
-        {
-            cover && (
-                <figure class="mb-8 overflow-hidden rounded-2xl border border-main/20">
-                    <CustomImage
-                        class="aspect-[16/9] w-full object-cover"
-                        src={cover}
-                        alt={title}
-                        width={1200}
-                        height={675}
-                        widths={[640, 960, 1200]}
-                        sizes="(min-width: 1024px) 48rem, 100vw"
-                        loading="eager"
-                        fetchpriority="high"
-                    />
-                </figure>
-            )
-        }
+        </div>
         {
             tableOfContents.length > 0 && (
-                <aside class="mb-8 xl:fixed xl:top-24 xl:right-8 xl:mb-0 xl:w-56 xl:max-w-[calc(50%-22rem)]" aria-label="文章目录">
+                <aside class="hidden lg:sticky lg:top-24 lg:col-start-2 lg:block" aria-label="文章目录">
                     <TocCard headings={tableOfContents} />
                 </aside>
             )
         }
-        <div class="prose sm:prose-lg max-w-none">
-            <Content />
-        </div>
-        <div class="mt-8 flex justify-end text-sm sm:mt-12 sm:text-base">
-            <Button class="copy-url-button" aria-label="复制链接" data-url={href} data-tooltip-default="复制链接" data-tooltip-success="已复制">分享</Button>
-        </div>
-    </article>
-    {
-        (prevPost || nextPost) && (
-            <div class="my-16 sm:my-24">
-                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">继续阅读</h2>
-                {nextPost && <PostPreview post={nextPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
-                {prevPost && <PostPreview post={prevPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
-            </div>
-        )
-    }
+    </div>
 </BaseLayout>
 
 <button
@@ -173,19 +186,23 @@ const articleJsonLd = {
     let tocObserver: IntersectionObserver | null = null;
 
     function initTocSpy() {
-        const tocNav = document.querySelector<HTMLElement>('[data-toc-spy]');
-        if (!tocNav) return;
+        const tocNavs = Array.from(document.querySelectorAll<HTMLElement>('[data-toc-spy]'));
+        if (tocNavs.length === 0) return;
 
-        const links = Array.from(tocNav.querySelectorAll<HTMLAnchorElement>('a[data-toc-link]'));
+        const links = tocNavs.flatMap((tocNav) => Array.from(tocNav.querySelectorAll<HTMLAnchorElement>('a[data-toc-link]')));
         if (links.length === 0) return;
 
-        const idToLink = new Map<string, HTMLAnchorElement>();
+        const idToLinks = new Map<string, HTMLAnchorElement[]>();
         for (const link of links) {
             const id = decodeURIComponent(link.hash.slice(1));
-            if (id) idToLink.set(id, link);
+            if (!id) continue;
+
+            const existingLinks = idToLinks.get(id) ?? [];
+            existingLinks.push(link);
+            idToLinks.set(id, existingLinks);
         }
 
-        const headings = Array.from(document.querySelectorAll<HTMLElement>('article :is(h2, h3)')).filter((heading) => idToLink.has(heading.id));
+        const headings = Array.from(document.querySelectorAll<HTMLElement>('article :is(h2, h3)')).filter((heading) => idToLinks.has(heading.id));
         if (headings.length === 0) return;
 
         tocObserver?.disconnect();
@@ -195,7 +212,7 @@ const articleJsonLd = {
             if (id === activeId) return;
             activeId = id;
             for (const link of links) link.classList.remove('toc-active');
-            idToLink.get(id)?.classList.add('toc-active');
+            for (const link of idToLinks.get(id) ?? []) link.classList.add('toc-active');
         };
 
         tocObserver = new IntersectionObserver(

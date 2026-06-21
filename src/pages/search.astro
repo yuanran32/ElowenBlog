@@ -25,7 +25,9 @@ const searchIndex = [
         title: project.data.title,
         description: project.data.description ?? project.data.seo?.description ?? createContentDescription(project.body),
         href: withBase(`/projects/${project.id}/`),
-        meta: [project.data.publishDate.toISOString().slice(0, 10), project.data.role, project.data.techStack.slice(0, 3).join(' · ')].filter(Boolean).join(' · '),
+        meta: [project.data.publishDate.toISOString().slice(0, 10), project.data.role, project.data.techStack.slice(0, 3).join(' · ')]
+            .filter(Boolean)
+            .join(' · '),
         keywords: [project.data.title, project.data.description, project.data.role, ...(project.data.techStack ?? []), ...(project.data.highlights ?? [])]
             .filter(Boolean)
             .join(' '),
@@ -64,6 +66,7 @@ const recentItems = searchIndex
     .filter((item) => item.dateMs > 0 && item.kind !== '标签' && item.kind !== '系列')
     .sort((itemA, itemB) => itemB.dateMs - itemA.dateMs || itemA.title.localeCompare(itemB.title))
     .slice(0, 8);
+const searchDataJson = JSON.stringify({ searchIndex, recentItems }).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
@@ -87,8 +90,8 @@ const recentItems = searchIndex
         <form class="border-main bg-muted flex items-center gap-3 border border-dashed px-4 py-3" role="search" onsubmit="return false">
             <span class="text-muted shrink-0" aria-hidden="true">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m20 20-3.5-3.5" />
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
                 </svg>
             </span>
             <label class="sr-only" for="site-search">搜索内容</label>
@@ -101,15 +104,10 @@ const recentItems = searchIndex
                 spellcheck="false"
                 placeholder="输入关键词，例如 Astro、部署、测试、Vercel"
             />
-            <button
-                type="button"
-                class="text-muted hover:text-main hidden h-9 w-9 items-center justify-center"
-                data-search-clear
-                aria-label="清空搜索"
-            >
+            <button type="button" class="text-muted hover:text-main hidden h-9 w-9 items-center justify-center" data-search-clear aria-label="清空搜索">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
                 </svg>
             </button>
         </form>
@@ -119,159 +117,205 @@ const recentItems = searchIndex
             <p class="text-muted">回车后不会跳转，输入即可筛选结果。</p>
         </div>
 
-        <div class="mt-6 border-main border-t" data-search-results></div>
+        <div class="border-main mt-6 border-t" data-search-results></div>
     </section>
 </BaseLayout>
 
-<script is:inline define:vars={{ searchIndex, recentItems }}>
-    const allItems = searchIndex.map((item) => ({
-        ...item,
-        normalizedTitle: item.title.normalize('NFKC').toLowerCase(),
-        normalizedText: [item.title, item.description, item.meta, item.keywords].filter(Boolean).join(' ').normalize('NFKC').toLowerCase()
-    }));
-    const recent = recentItems.map((item) => ({
-        ...item,
-        normalizedTitle: item.title.normalize('NFKC').toLowerCase(),
-        normalizedText: [item.title, item.description, item.meta, item.keywords].filter(Boolean).join(' ').normalize('NFKC').toLowerCase()
-    }));
+<script is:inline id="site-search-data" type="application/json" set:html={searchDataJson} />
 
-    const input = document.querySelector('[data-search-input]');
-    const clearButton = document.querySelector('[data-search-clear]');
-    const summary = document.querySelector('[data-search-summary]');
-    const results = document.querySelector('[data-search-results]');
+<script>
+    type SearchItem = {
+        kind: string;
+        title: string;
+        description: string;
+        href: string;
+        meta: string;
+        keywords: string;
+        dateMs: number;
+    };
 
-    if (!input || !clearButton || !summary || !results) {
-        throw new Error('Search page failed to initialize.');
+    type NormalizedSearchItem = SearchItem & {
+        normalizedTitle: string;
+        normalizedText: string;
+    };
+
+    type SearchData = {
+        searchIndex: SearchItem[];
+        recentItems: SearchItem[];
+    };
+
+    type ScoredSearchItem = {
+        item: NormalizedSearchItem;
+        score: number;
+    };
+
+    function parseSearchData(): SearchData | null {
+        const dataScript = document.getElementById('site-search-data');
+        if (!(dataScript instanceof HTMLScriptElement) || !dataScript.textContent) return null;
+        return JSON.parse(dataScript.textContent) as SearchData;
     }
 
-    function normalizeQuery(value) {
-        return value.normalize('NFKC').toLowerCase().trim().replace(/\s+/g, ' ');
+    function normalizeItems(items: SearchItem[]): NormalizedSearchItem[] {
+        return items.map((item) => ({
+            ...item,
+            normalizedTitle: item.title.normalize('NFKC').toLowerCase(),
+            normalizedText: [item.title, item.description, item.meta, item.keywords].filter(Boolean).join(' ').normalize('NFKC').toLowerCase()
+        }));
     }
 
-    function updateUrl(query) {
-        const url = new URL(window.location.href);
-        if (query) {
-            url.searchParams.set('q', query);
-        } else {
-            url.searchParams.delete('q');
-        }
-        window.history.replaceState({}, '', url.pathname + url.search + url.hash);
-    }
+    function initSearchPage() {
+        const searchData = parseSearchData();
+        const inputElement = document.querySelector<HTMLInputElement>('[data-search-input]');
+        const clearButtonElement = document.querySelector<HTMLButtonElement>('[data-search-clear]');
+        const summaryElement = document.querySelector<HTMLElement>('[data-search-summary]');
+        const resultsElement = document.querySelector<HTMLElement>('[data-search-results]');
 
-    function scoreItem(item, query, tokens) {
-        const normalizedQuery = normalizeQuery(query);
-        let score = 0;
+        if (!searchData || !inputElement || !clearButtonElement || !summaryElement || !resultsElement) return;
 
-        if (item.normalizedTitle === normalizedQuery) score += 500;
-        if (item.normalizedTitle.startsWith(normalizedQuery)) score += 200;
-        if (item.normalizedTitle.includes(normalizedQuery)) score += 100;
-        if (item.normalizedText.includes(normalizedQuery)) score += 40;
+        const input = inputElement;
+        const clearButton = clearButtonElement;
+        const summary = summaryElement;
+        const results = resultsElement;
 
-        for (const token of tokens) {
-            if (item.normalizedTitle.includes(token)) score += 20;
-            if (item.normalizedText.includes(token)) score += 5;
-        }
+        const allItems = normalizeItems(searchData.searchIndex);
+        const recent = normalizeItems(searchData.recentItems);
 
-        if (item.dateMs > 0) score += Math.min(item.dateMs / 1e11, 10);
-        return score;
-    }
+        if (input.dataset.searchReady === 'true') return;
+        input.dataset.searchReady = 'true';
 
-    function formatItemMeta(item) {
-        const parts = [item.kind];
-        if (item.meta) parts.push(item.meta);
-        return parts.join(' · ');
-    }
-
-    function createResultItem(item) {
-        const link = document.createElement('a');
-        link.className = 'group border-main hover:bg-muted flex items-start gap-4 border-b py-4 transition-colors sm:gap-6 sm:py-5';
-        link.href = item.href;
-
-        const body = document.createElement('div');
-        body.className = 'min-w-0 grow';
-
-        const header = document.createElement('div');
-        header.className = 'flex flex-wrap items-center gap-2';
-
-        const kind = document.createElement('span');
-        kind.className = 'border-main text-muted inline-flex shrink-0 rounded-full border px-2.5 py-0.5 text-xs';
-        kind.textContent = item.kind;
-
-        const title = document.createElement('h2');
-        title.className = 'font-serif text-xl leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-2xl';
-        title.textContent = item.title;
-
-        header.append(kind, title);
-
-        const description = document.createElement('p');
-        description.className = 'text-muted mt-2 text-sm leading-relaxed sm:text-base';
-        description.textContent = item.description || ' ';
-
-        const meta = document.createElement('p');
-        meta.className = 'text-muted mt-2 text-xs leading-relaxed';
-        meta.textContent = formatItemMeta(item);
-
-        body.append(header, description, meta);
-
-        const indicator = document.createElement('div');
-        indicator.className = 'text-muted hidden shrink-0 font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:items-center sm:gap-1';
-        indicator.textContent = '查看';
-
-        link.append(body, indicator);
-        return link;
-    }
-
-    function render(items, message) {
-        results.replaceChildren();
-        summary.textContent = message;
-
-        if (items.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'text-muted py-10 text-sm leading-relaxed';
-            empty.textContent = '没有找到匹配内容。可以试试文章标题、标签、系列或项目技术栈。';
-            results.append(empty);
-            return;
+        function normalizeQuery(value: string): string {
+            return value.normalize('NFKC').toLowerCase().trim().replace(/\s+/g, ' ');
         }
 
-        const fragment = document.createDocumentFragment();
-        for (const item of items) {
-            fragment.append(createResultItem(item));
-        }
-        results.append(fragment);
-    }
-
-    function runSearch() {
-        const query = normalizeQuery(input.value);
-        clearButton.classList.toggle('hidden', !query);
-
-        if (!query) {
-            render(recent, `最近更新 ${recent.length} 项`);
-            updateUrl('');
-            return;
+        function updateUrl(query: string) {
+            const url = new URL(window.location.href);
+            if (query) {
+                url.searchParams.set('q', query);
+            } else {
+                url.searchParams.delete('q');
+            }
+            window.history.replaceState({}, '', url.pathname + url.search + url.hash);
         }
 
-        const tokens = query.split(' ').filter(Boolean);
-        const matched = allItems
-            .filter((item) => item.normalizedText.includes(query) || tokens.every((token) => item.normalizedText.includes(token)))
-            .map((item) => ({ item, score: scoreItem(item, query, tokens) }))
-            .sort((left, right) => right.score - left.score || right.item.dateMs - left.item.dateMs || left.item.title.localeCompare(right.item.title))
-            .slice(0, 50)
-            .map(({ item }) => item);
+        function scoreItem(item: NormalizedSearchItem, query: string, tokens: string[]): number {
+            const normalizedQuery = normalizeQuery(query);
+            let score = 0;
 
-        render(matched, `找到 ${matched.length} 项结果`);
-        updateUrl(query);
-    }
+            if (item.normalizedTitle === normalizedQuery) score += 500;
+            if (item.normalizedTitle.startsWith(normalizedQuery)) score += 200;
+            if (item.normalizedTitle.includes(normalizedQuery)) score += 100;
+            if (item.normalizedText.includes(normalizedQuery)) score += 40;
 
-    const initialQuery = new URL(window.location.href).searchParams.get('q') ?? '';
-    input.value = initialQuery;
+            for (const token of tokens) {
+                if (item.normalizedTitle.includes(token)) score += 20;
+                if (item.normalizedText.includes(token)) score += 5;
+            }
 
-    input.addEventListener('input', runSearch);
-    clearButton.addEventListener('click', () => {
-        input.value = '';
-        input.focus();
+            if (item.dateMs > 0) score += Math.min(item.dateMs / 1e11, 10);
+            return score;
+        }
+
+        function formatItemMeta(item: SearchItem): string {
+            const parts = [item.kind];
+            if (item.meta) parts.push(item.meta);
+            return parts.join(' · ');
+        }
+
+        function createResultItem(item: SearchItem): HTMLAnchorElement {
+            const link = document.createElement('a');
+            link.className = 'group border-main hover:bg-muted flex items-start gap-4 border-b py-4 transition-colors sm:gap-6 sm:py-5';
+            link.href = item.href;
+
+            const body = document.createElement('div');
+            body.className = 'min-w-0 grow';
+
+            const header = document.createElement('div');
+            header.className = 'flex flex-wrap items-center gap-2';
+
+            const kind = document.createElement('span');
+            kind.className = 'border-main text-muted inline-flex shrink-0 rounded-full border px-2.5 py-0.5 text-xs';
+            kind.textContent = item.kind;
+
+            const title = document.createElement('h2');
+            title.className =
+                'font-serif text-xl leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-2xl';
+            title.textContent = item.title;
+
+            header.append(kind, title);
+
+            const description = document.createElement('p');
+            description.className = 'text-muted mt-2 text-sm leading-relaxed sm:text-base';
+            description.textContent = item.description || ' ';
+
+            const meta = document.createElement('p');
+            meta.className = 'text-muted mt-2 text-xs leading-relaxed';
+            meta.textContent = formatItemMeta(item);
+
+            body.append(header, description, meta);
+
+            const indicator = document.createElement('div');
+            indicator.className =
+                'text-muted hidden shrink-0 font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:items-center sm:gap-1';
+            indicator.textContent = '查看';
+
+            link.append(body, indicator);
+            return link;
+        }
+
+        function render(items: SearchItem[], message: string) {
+            results.replaceChildren();
+            summary.textContent = message;
+
+            if (items.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-muted py-10 text-sm leading-relaxed';
+                empty.textContent = '没有找到匹配内容。可以试试文章标题、标签、系列或项目技术栈。';
+                results.append(empty);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            for (const item of items) {
+                fragment.append(createResultItem(item));
+            }
+            results.append(fragment);
+        }
+
+        function runSearch() {
+            const query = normalizeQuery(input.value);
+            clearButton.classList.toggle('hidden', !query);
+
+            if (!query) {
+                render(recent, `最近更新 ${recent.length} 项`);
+                updateUrl('');
+                return;
+            }
+
+            const tokens = query.split(' ').filter(Boolean);
+            const matched = allItems
+                .filter((item) => item.normalizedText.includes(query) || tokens.every((token) => item.normalizedText.includes(token)))
+                .map((item): ScoredSearchItem => ({ item, score: scoreItem(item, query, tokens) }))
+                .sort((left, right) => right.score - left.score || right.item.dateMs - left.item.dateMs || left.item.title.localeCompare(right.item.title))
+                .slice(0, 50)
+                .map(({ item }) => item);
+
+            render(matched, `找到 ${matched.length} 项结果`);
+            updateUrl(query);
+        }
+
+        const initialQuery = new URL(window.location.href).searchParams.get('q') ?? '';
+        input.value = initialQuery;
+
+        input.addEventListener('input', runSearch);
+        clearButton.addEventListener('click', () => {
+            input.value = '';
+            input.focus();
+            runSearch();
+        });
+
         runSearch();
-    });
+    }
 
-    runSearch();
-    document.addEventListener('astro:page-load', runSearch);
+    initSearchPage();
+    document.addEventListener('astro:page-load', initSearchPage);
 </script>
