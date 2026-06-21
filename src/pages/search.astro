@@ -1,0 +1,277 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../utils/common-utils';
+import { createContentDescription, createPostDescription, getAllProjects, getPublishedBlogPosts, getSeriesIndex, getTagIndex } from '../utils/data-utils';
+
+const posts = await getPublishedBlogPosts();
+const projects = await getAllProjects();
+const pages = await getCollection('pages');
+const tags = getTagIndex(posts);
+const seriesList = getSeriesIndex(posts);
+
+const searchIndex = [
+    ...posts.map((post) => ({
+        kind: '文章',
+        title: post.data.title,
+        description: post.data.excerpt ?? post.data.seo?.description ?? createPostDescription(post),
+        href: withBase(`/blog/${post.id}/`),
+        meta: [post.data.publishDate.toISOString().slice(0, 10), post.data.series].filter(Boolean).join(' · '),
+        keywords: [post.data.title, post.data.excerpt, post.data.series, ...(post.data.tags ?? [])].filter(Boolean).join(' '),
+        dateMs: post.data.publishDate.getTime()
+    })),
+    ...projects.map((project) => ({
+        kind: '项目',
+        title: project.data.title,
+        description: project.data.description ?? project.data.seo?.description ?? createContentDescription(project.body),
+        href: withBase(`/projects/${project.id}/`),
+        meta: [project.data.publishDate.toISOString().slice(0, 10), project.data.role, project.data.techStack.slice(0, 3).join(' · ')].filter(Boolean).join(' · '),
+        keywords: [project.data.title, project.data.description, project.data.role, ...(project.data.techStack ?? []), ...(project.data.highlights ?? [])]
+            .filter(Boolean)
+            .join(' '),
+        dateMs: project.data.publishDate.getTime()
+    })),
+    ...pages.map((page) => ({
+        kind: '页面',
+        title: page.data.title,
+        description: page.data.seo?.description ?? createContentDescription(page.body),
+        href: withBase(page.id === 'resume' ? '/resume/' : `/${page.id}/`),
+        meta: '页面',
+        keywords: [page.data.title, page.data.seo?.description, createContentDescription(page.body)].filter(Boolean).join(' '),
+        dateMs: 0
+    })),
+    ...tags.map((tag) => ({
+        kind: '标签',
+        title: `#${tag.name}`,
+        description: `${tag.count} 篇文章`,
+        href: withBase(`/tags/${tag.id}/`),
+        meta: '标签',
+        keywords: tag.name,
+        dateMs: 0
+    })),
+    ...seriesList.map((series) => ({
+        kind: '系列',
+        title: series.name,
+        description: `${series.count} 篇文章`,
+        href: withBase(`/series/${series.id}/`),
+        meta: '系列',
+        keywords: series.name,
+        dateMs: 0
+    }))
+];
+
+const recentItems = searchIndex
+    .filter((item) => item.dateMs > 0 && item.kind !== '标签' && item.kind !== '系列')
+    .sort((itemA, itemB) => itemB.dateMs - itemA.dateMs || itemA.title.localeCompare(itemB.title))
+    .slice(0, 8);
+---
+
+<BaseLayout
+    title="搜索"
+    description="搜索文章、项目、页面、标签和系列。"
+    canonical={withBase('/search/')}
+    robots="noindex,follow"
+    showHeader={false}
+    containerClass="max-w-5xl"
+    mainClass="mx-auto w-full max-w-5xl grow"
+>
+    <section class="mx-auto w-full max-w-4xl px-2 pb-16 sm:px-6 sm:pb-24">
+        <div class="mb-8 sm:mb-12">
+            <p class="text-muted mb-2 text-xs font-semibold tracking-[0.18em] uppercase">Site Search</p>
+            <h1 class="font-serif text-3xl leading-tight font-medium sm:text-5xl">站内搜索</h1>
+            <p class="text-muted mt-4 max-w-2xl text-sm leading-relaxed sm:text-base">
+                搜索文章、项目、页面、标签和系列，支持标题、摘要、技术栈、标签与系列名称。
+            </p>
+        </div>
+
+        <form class="border-main bg-muted flex items-center gap-3 border border-dashed px-4 py-3" role="search" onsubmit="return false">
+            <span class="text-muted shrink-0" aria-hidden="true">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.5-3.5" />
+                </svg>
+            </span>
+            <label class="sr-only" for="site-search">搜索内容</label>
+            <input
+                id="site-search"
+                class="text-main min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-[color:var(--text-muted)]"
+                data-search-input
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="输入关键词，例如 Astro、部署、测试、Vercel"
+            />
+            <button
+                type="button"
+                class="text-muted hover:text-main hidden h-9 w-9 items-center justify-center"
+                data-search-clear
+                aria-label="清空搜索"
+            >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                </svg>
+            </button>
+        </form>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <p class="text-muted" data-search-summary aria-live="polite">加载中...</p>
+            <p class="text-muted">回车后不会跳转，输入即可筛选结果。</p>
+        </div>
+
+        <div class="mt-6 border-main border-t" data-search-results></div>
+    </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ searchIndex, recentItems }}>
+    const allItems = searchIndex.map((item) => ({
+        ...item,
+        normalizedTitle: item.title.normalize('NFKC').toLowerCase(),
+        normalizedText: [item.title, item.description, item.meta, item.keywords].filter(Boolean).join(' ').normalize('NFKC').toLowerCase()
+    }));
+    const recent = recentItems.map((item) => ({
+        ...item,
+        normalizedTitle: item.title.normalize('NFKC').toLowerCase(),
+        normalizedText: [item.title, item.description, item.meta, item.keywords].filter(Boolean).join(' ').normalize('NFKC').toLowerCase()
+    }));
+
+    const input = document.querySelector('[data-search-input]');
+    const clearButton = document.querySelector('[data-search-clear]');
+    const summary = document.querySelector('[data-search-summary]');
+    const results = document.querySelector('[data-search-results]');
+
+    if (!input || !clearButton || !summary || !results) {
+        throw new Error('Search page failed to initialize.');
+    }
+
+    function normalizeQuery(value) {
+        return value.normalize('NFKC').toLowerCase().trim().replace(/\s+/g, ' ');
+    }
+
+    function updateUrl(query) {
+        const url = new URL(window.location.href);
+        if (query) {
+            url.searchParams.set('q', query);
+        } else {
+            url.searchParams.delete('q');
+        }
+        window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+    }
+
+    function scoreItem(item, query, tokens) {
+        const normalizedQuery = normalizeQuery(query);
+        let score = 0;
+
+        if (item.normalizedTitle === normalizedQuery) score += 500;
+        if (item.normalizedTitle.startsWith(normalizedQuery)) score += 200;
+        if (item.normalizedTitle.includes(normalizedQuery)) score += 100;
+        if (item.normalizedText.includes(normalizedQuery)) score += 40;
+
+        for (const token of tokens) {
+            if (item.normalizedTitle.includes(token)) score += 20;
+            if (item.normalizedText.includes(token)) score += 5;
+        }
+
+        if (item.dateMs > 0) score += Math.min(item.dateMs / 1e11, 10);
+        return score;
+    }
+
+    function formatItemMeta(item) {
+        const parts = [item.kind];
+        if (item.meta) parts.push(item.meta);
+        return parts.join(' · ');
+    }
+
+    function createResultItem(item) {
+        const link = document.createElement('a');
+        link.className = 'group border-main hover:bg-muted flex items-start gap-4 border-b py-4 transition-colors sm:gap-6 sm:py-5';
+        link.href = item.href;
+
+        const body = document.createElement('div');
+        body.className = 'min-w-0 grow';
+
+        const header = document.createElement('div');
+        header.className = 'flex flex-wrap items-center gap-2';
+
+        const kind = document.createElement('span');
+        kind.className = 'border-main text-muted inline-flex shrink-0 rounded-full border px-2.5 py-0.5 text-xs';
+        kind.textContent = item.kind;
+
+        const title = document.createElement('h2');
+        title.className = 'font-serif text-xl leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-2xl';
+        title.textContent = item.title;
+
+        header.append(kind, title);
+
+        const description = document.createElement('p');
+        description.className = 'text-muted mt-2 text-sm leading-relaxed sm:text-base';
+        description.textContent = item.description || ' ';
+
+        const meta = document.createElement('p');
+        meta.className = 'text-muted mt-2 text-xs leading-relaxed';
+        meta.textContent = formatItemMeta(item);
+
+        body.append(header, description, meta);
+
+        const indicator = document.createElement('div');
+        indicator.className = 'text-muted hidden shrink-0 font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:items-center sm:gap-1';
+        indicator.textContent = '查看';
+
+        link.append(body, indicator);
+        return link;
+    }
+
+    function render(items, message) {
+        results.replaceChildren();
+        summary.textContent = message;
+
+        if (items.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'text-muted py-10 text-sm leading-relaxed';
+            empty.textContent = '没有找到匹配内容。可以试试文章标题、标签、系列或项目技术栈。';
+            results.append(empty);
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        for (const item of items) {
+            fragment.append(createResultItem(item));
+        }
+        results.append(fragment);
+    }
+
+    function runSearch() {
+        const query = normalizeQuery(input.value);
+        clearButton.classList.toggle('hidden', !query);
+
+        if (!query) {
+            render(recent, `最近更新 ${recent.length} 项`);
+            updateUrl('');
+            return;
+        }
+
+        const tokens = query.split(' ').filter(Boolean);
+        const matched = allItems
+            .filter((item) => item.normalizedText.includes(query) || tokens.every((token) => item.normalizedText.includes(token)))
+            .map((item) => ({ item, score: scoreItem(item, query, tokens) }))
+            .sort((left, right) => right.score - left.score || right.item.dateMs - left.item.dateMs || left.item.title.localeCompare(right.item.title))
+            .slice(0, 50)
+            .map(({ item }) => item);
+
+        render(matched, `找到 ${matched.length} 项结果`);
+        updateUrl(query);
+    }
+
+    const initialQuery = new URL(window.location.href).searchParams.get('q') ?? '';
+    input.value = initialQuery;
+
+    input.addEventListener('input', runSearch);
+    clearButton.addEventListener('click', () => {
+        input.value = '';
+        input.focus();
+        runSearch();
+    });
+
+    runSearch();
+    document.addEventListener('astro:page-load', runSearch);
+</script>
