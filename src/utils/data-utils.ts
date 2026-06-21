@@ -13,6 +13,20 @@ function warnOnce(message: string) {
     console.warn(`[content-health] ${message}`);
 }
 
+function stripMarkdown(content?: string) {
+    if (!content) return '';
+
+    return content
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/[#>*_~[\]()-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 export function sortItemsByDateDesc(itemA: BlogPost | Project, itemB: BlogPost | Project) {
     return new Date(itemB.data.publishDate).getTime() - new Date(itemA.data.publishDate).getTime();
 }
@@ -146,12 +160,11 @@ export function getPostsBySeries(posts: BlogPost[], seriesId: string) {
 export function createPostDescription(post: BlogPost) {
     if (post.data.excerpt) return post.data.excerpt;
 
-    return (post.body ?? '')
-        .replace(/```[\s\S]*?```/g, ' ')
-        .replace(/[#>*_`[\]()-]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 180);
+    return createContentDescription(post.body);
+}
+
+export function createContentDescription(content?: string, maxLength = 180) {
+    return stripMarkdown(content).slice(0, maxLength);
 }
 
 function reportBlogContentHealth(posts: BlogPost[]) {

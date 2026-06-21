@@ -2,6 +2,7 @@
 import { type CollectionEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../../components/Button.astro';
+import CustomImage from '../../components/CustomImage.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import PostPreview from '../../components/PostPreview.astro';
 import TocCard from '../../components/TocCard.astro';
@@ -25,7 +26,7 @@ type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>;
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], series, draft, seo } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags = [], series, draft, seo, cover } = post.data;
 const { Content, headings } = await render(post);
 const tableOfContents = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
 const readingTime = getReadingTime(post.body);
@@ -96,6 +97,30 @@ const articleJsonLd = {
                 )
             }
         </header>
+        {
+            cover && (
+                <figure class="mb-8 overflow-hidden rounded-2xl border border-main/20">
+                    <CustomImage
+                        class="aspect-[16/9] w-full object-cover"
+                        src={cover}
+                        alt={title}
+                        width={1200}
+                        height={675}
+                        widths={[640, 960, 1200]}
+                        sizes="(min-width: 1024px) 48rem, 100vw"
+                        loading="eager"
+                        fetchpriority="high"
+                    />
+                </figure>
+            )
+        }
+        {
+            tableOfContents.length > 0 && (
+                <aside class="mb-8 xl:fixed xl:top-24 xl:right-8 xl:mb-0 xl:w-56 xl:max-w-[calc(50%-22rem)]" aria-label="文章目录">
+                    <TocCard headings={tableOfContents} />
+                </aside>
+            )
+        }
         <div class="prose sm:prose-lg max-w-none">
             <Content />
         </div>
@@ -110,13 +135,6 @@ const articleJsonLd = {
                 {nextPost && <PostPreview post={nextPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
                 {prevPost && <PostPreview post={prevPost} class="mb-10 sm:mb-12" headingLevel="h3" />}
             </div>
-        )
-    }
-    {
-        tableOfContents.length > 0 && (
-            <aside class="mb-10 xl:fixed xl:top-24 xl:right-8 xl:mb-0 xl:w-56 xl:max-w-[calc(50%-22rem)]" aria-label="文章目录">
-                <TocCard headings={tableOfContents} />
-            </aside>
         )
     }
 </BaseLayout>

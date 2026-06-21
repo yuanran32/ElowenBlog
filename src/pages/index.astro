@@ -11,6 +11,8 @@ const publishedPosts = await getPublishedBlogPosts();
 const allProjects = await getAllProjects();
 const featuredPosts = publishedPosts.filter(({ data }) => data.isFeatured);
 const featuredProjects = allProjects.filter(({ data }) => data.isFeatured);
+const homePosts = featuredPosts.length > 0 ? featuredPosts : publishedPosts.slice(0, 3);
+const homePostsTitle = featuredPosts.length > 0 ? '精选文章' : '最新文章';
 const focusAreas = siteConfig.focusAreas ?? [];
 const githubLink = siteConfig.socialLinks?.find((link) => link.href.includes('github.com'));
 const githubLabel = githubLink?.href.split('/').filter(Boolean).pop() ?? githubLink?.text ?? 'GitHub';
@@ -143,19 +145,17 @@ const homeJsonLd = [
             }
         </div>
     </section>
-    {
-        featuredPosts?.length > 0 && (
-            <div class="mb-16 sm:mb-24">
-                <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">近期文章</h2>
-                {featuredPosts.map((post) => (
-                    <PostPreview post={post} class="mb-10 sm:mb-12" headingLevel="h3" />
-                ))}
-                <div class="mt-12 sm:mt-16">
-                    <Button href="/blog/">查看全部文章</Button>
-                </div>
+    {homePosts.length > 0 && (
+        <div class="mb-16 sm:mb-24">
+            <h2 class="mb-12 font-serif text-xl italic sm:mb-16 sm:text-2xl">{homePostsTitle}</h2>
+            {homePosts.map((post) => (
+                <PostPreview post={post} class="mb-10 sm:mb-12" headingLevel="h3" />
+            ))}
+            <div class="mt-12 sm:mt-16">
+                <Button href="/blog/">查看全部文章</Button>
             </div>
-        )
-    }
+        </div>
+    )}
     {
         featuredProjects?.length > 0 && (
             <div class="mb-16 sm:mb-24">

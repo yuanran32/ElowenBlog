@@ -47,6 +47,10 @@ const siteConfig: SiteConfig = {
         {
             text: '标签',
             href: '/tags/'
+        },
+        {
+            text: '搜索',
+            href: '/search/'
         }
     ],
     footerNavLinks: [
