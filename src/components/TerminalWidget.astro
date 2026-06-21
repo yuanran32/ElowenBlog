@@ -1,36 +1,127 @@
 ---
+import { getCollection } from 'astro:content';
 import siteConfig from '../data/site-config';
 import { withBase } from '../utils/common-utils';
-import { createPostDescription, getAllProjects, getPublishedBlogPosts, getTagIndex } from '../utils/data-utils';
+import { createContentDescription, createPostDescription, getAllProjects, getPublishedBlogPosts, getSeriesIndex, getTagIndex } from '../utils/data-utils';
 
 const posts = await getPublishedBlogPosts();
 const projects = await getAllProjects();
+const pages = await getCollection('pages');
 const tags = getTagIndex(posts);
+const seriesList = getSeriesIndex(posts);
 const githubLink = siteConfig.socialLinks?.find((link) => link.href.includes('github.com'));
+const absoluteSiteUrl = siteConfig.website.replace(/\/$/, '');
+const toAbsoluteUrl = (path: string) => new URL(withBase(path), absoluteSiteUrl).toString();
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const email = pages
+    .map((page) => page.body)
+    .join('\n')
+    .match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+
+const postItems = posts.map((post) => {
+    const description = post.data.excerpt ?? post.data.seo?.description ?? createPostDescription(post);
+
+    return {
+        kind: 'post',
+        id: post.id,
+        title: post.data.title,
+        date: formatDate(post.data.publishDate),
+        description,
+        href: withBase(`/blog/${post.id}/`),
+        meta: [formatDate(post.data.publishDate), post.data.series].filter(Boolean).join(' | '),
+        keywords: [
+            post.data.title,
+            post.data.excerpt,
+            post.data.seo?.description,
+            post.data.series,
+            ...(post.data.tags ?? []),
+            createContentDescription(post.body)
+        ]
+            .filter(Boolean)
+            .join(' ')
+    };
+});
+
+const projectItems = projects.map((project) => {
+    const description = project.data.description ?? project.data.seo?.description ?? createContentDescription(project.body);
+
+    return {
+        kind: 'project',
+        id: project.id,
+        title: project.data.title,
+        date: formatDate(project.data.publishDate),
+        description,
+        href: withBase(`/projects/${project.id}/`),
+        meta: [formatDate(project.data.publishDate), project.data.role, project.data.techStack.slice(0, 3).join(' | ')].filter(Boolean).join(' | '),
+        keywords: [
+            project.data.title,
+            project.data.description,
+            project.data.seo?.description,
+            project.data.role,
+            ...(project.data.techStack ?? []),
+            ...(project.data.highlights ?? []),
+            createContentDescription(project.body)
+        ]
+            .filter(Boolean)
+            .join(' ')
+    };
+});
+
+const pageItems = pages.map((page) => {
+    const href = page.id === 'resume' ? withBase('/resume/') : withBase(`/${page.id}/`);
+    const description = page.data.seo?.description ?? createContentDescription(page.body);
+
+    return {
+        kind: 'page',
+        id: page.id,
+        title: page.data.title,
+        date: '',
+        description,
+        href,
+        meta: 'page',
+        keywords: [page.data.title, page.data.seo?.description, createContentDescription(page.body)].filter(Boolean).join(' ')
+    };
+});
+
+const tagItems = tags.map((tag) => ({
+    kind: 'tag',
+    id: tag.id,
+    title: `#${tag.name}`,
+    name: tag.name,
+    count: tag.count,
+    description: `${tag.count} ${tag.count === 1 ? 'post' : 'posts'}`,
+    href: withBase(`/tags/${tag.id}/`),
+    meta: 'tag',
+    keywords: tag.name
+}));
+
+const seriesItems = seriesList.map((series) => ({
+    kind: 'series',
+    id: series.id,
+    title: series.name,
+    name: series.name,
+    count: series.count,
+    description: `${series.count} ${series.count === 1 ? 'post' : 'posts'}`,
+    href: withBase(`/series/${series.id}/`),
+    meta: 'series',
+    keywords: series.name
+}));
 
 const terminalData = {
     site: {
         title: siteConfig.title,
         subtitle: siteConfig.subtitle,
-        description: siteConfig.description
+        description: siteConfig.description,
+        website: absoluteSiteUrl
     },
-    posts: posts.slice(0, 5).map((post) => ({
-        title: post.data.title,
-        date: post.data.publishDate.toISOString().slice(0, 10),
-        description: createPostDescription(post),
-        href: withBase(`/blog/${post.id}/`)
-    })),
-    projects: projects.slice(0, 5).map((project) => ({
-        title: project.data.title,
-        description: project.data.description ?? '',
-        href: withBase(`/projects/${project.id}/`)
-    })),
-    tags: tags.slice(0, 12).map((tag) => ({
-        name: tag.name,
-        count: tag.count,
-        href: withBase(`/tags/${tag.id}/`)
-    })),
+    posts: postItems,
+    projects: projectItems,
+    pages: pageItems,
+    tags: tagItems,
+    series: seriesItems,
+    searchItems: [...postItems, ...projectItems, ...pageItems, ...tagItems, ...seriesItems],
     routes: {
+        home: withBase('/'),
         blog: withBase('/blog/'),
         posts: withBase('/blog/'),
         projects: withBase('/projects/'),
@@ -38,7 +129,18 @@ const terminalData = {
         about: withBase('/about/'),
         contact: withBase('/contact/'),
         tags: withBase('/tags/'),
+        series: withBase('/series/'),
+        search: withBase('/search/'),
+        terminal: withBase('/terminal/'),
+        rss: withBase('/rss.xml'),
         github: githubLink?.href ?? 'https://github.com/yuanran32'
+    },
+    copyTargets: {
+        site: absoluteSiteUrl,
+        github: githubLink?.href ?? 'https://github.com/yuanran32',
+        rss: toAbsoluteUrl('/rss.xml'),
+        contact: toAbsoluteUrl('/contact/'),
+        ...(email ? { email } : {})
     }
 };
 ---
@@ -97,8 +199,41 @@ const terminalData = {
         throw new Error('Terminal widget failed to initialize.');
     }
 
+    const routes = terminalData.routes;
     const commandHistory = [];
     let historyIndex = 0;
+
+    const normalizeText = (value = '') => value.normalize('NFKC').toLowerCase().trim();
+    const compactCommand = (value = '') => value.trim().replace(/\s+/g, ' ');
+    const splitCommand = (value) => {
+        const command = compactCommand(value);
+        if (!command) return { command: '', name: '', args: [] };
+        const [name, ...args] = command.split(' ');
+        return { command, name: normalizeText(name), args };
+    };
+
+    const indexedItems = terminalData.searchItems.map((item) => ({
+        ...item,
+        normalizedId: normalizeText(item.id),
+        normalizedTitle: normalizeText(item.title),
+        normalizedText: normalizeText([item.title, item.description, item.meta, item.keywords, item.id, item.name].filter(Boolean).join(' '))
+    }));
+
+    const lookupTargets = new Map();
+    const registerTarget = (key, target) => {
+        const normalizedKey = normalizeText(key).replace(/^#/, '');
+        if (normalizedKey && !lookupTargets.has(normalizedKey)) lookupTargets.set(normalizedKey, target);
+    };
+
+    for (const [key, href] of Object.entries(routes)) {
+        registerTarget(key, { title: key, href, kind: 'route' });
+    }
+
+    for (const item of indexedItems) {
+        registerTarget(item.id, item);
+        registerTarget(item.title, item);
+        if (item.name) registerTarget(item.name, item);
+    }
 
     const createLine = (text = '', className = 'text-main') => {
         const line = document.createElement('div');
@@ -112,12 +247,12 @@ const terminalData = {
         line.className = 'text-muted flex flex-col gap-0.5 py-1 sm:flex-row sm:items-baseline sm:gap-2';
 
         const link = document.createElement('a');
-        link.className = 'text-main underline decoration-dashed underline-offset-4 transition hover:decoration-solid';
+        link.className = 'text-main break-words underline decoration-dashed underline-offset-4 transition hover:decoration-solid';
         link.href = href;
         link.textContent = label;
 
         const meta = document.createElement('span');
-        meta.className = 'text-muted';
+        meta.className = 'text-muted break-words';
         meta.textContent = detail ?? '';
 
         line.append(link);
@@ -168,98 +303,284 @@ const terminalData = {
         scrollToBottom();
     };
 
-    const routeLabels = {
-        blog: 'blog',
-        posts: 'posts',
-        projects: 'projects',
-        resume: 'resume',
-        about: 'about',
-        contact: 'contact',
-        tags: 'tags',
-        github: 'github'
+    const itemToEntry = (item) => ({
+        type: 'link',
+        label: item.title,
+        href: item.href,
+        detail: [item.meta, item.description].filter(Boolean).join('  ')
+    });
+
+    const listEntries = (items, emptyText, limit = 8) => {
+        if (!items.length) return [emptyText];
+        return items.slice(0, limit).map(itemToEntry);
+    };
+
+    const findMatches = (query, limit = 8) => {
+        const normalizedQuery = normalizeText(query);
+        if (!normalizedQuery) return [];
+
+        const tokens = normalizedQuery.split(' ').filter(Boolean);
+        return indexedItems
+            .filter((item) => item.normalizedText.includes(normalizedQuery) || tokens.every((token) => item.normalizedText.includes(token)))
+            .map((item) => {
+                let score = 0;
+                if (item.normalizedTitle === normalizedQuery || item.normalizedId === normalizedQuery) score += 400;
+                if (item.normalizedTitle.startsWith(normalizedQuery) || item.normalizedId.startsWith(normalizedQuery)) score += 160;
+                if (item.normalizedTitle.includes(normalizedQuery)) score += 80;
+                if (item.normalizedText.includes(normalizedQuery)) score += 30;
+                for (const token of tokens) {
+                    if (item.normalizedTitle.includes(token)) score += 16;
+                    if (item.normalizedText.includes(token)) score += 4;
+                }
+                return { item, score };
+            })
+            .sort((left, right) => right.score - left.score || left.item.title.localeCompare(right.item.title))
+            .slice(0, limit)
+            .map(({ item }) => item);
+    };
+
+    const openHref = (href) => {
+        if (/^https?:\/\//i.test(href)) {
+            window.open(href, '_blank', 'noopener,noreferrer');
+        } else {
+            window.location.href = href;
+        }
+    };
+
+    const resolveTarget = (args) => {
+        const target = normalizeText(args.join(' ')).replace(/^#/, '');
+        if (!target) return null;
+        return lookupTargets.get(target) ?? findMatches(target, 1)[0] ?? null;
+    };
+
+    const copyText = async (value) => {
+        if (!value) return false;
+        try {
+            await navigator.clipboard.writeText(value);
+            return true;
+        } catch {
+            return false;
+        }
     };
 
     const commandHandlers = {
-        help: () => [
-            'available commands',
-            { type: 'muted', text: 'about          show profile summary' },
-            { type: 'muted', text: 'posts          list recent posts' },
-            { type: 'muted', text: 'projects       list selected projects' },
-            { type: 'muted', text: 'tags           list popular tags' },
-            { type: 'muted', text: 'open <target>  open blog/projects/resume/about/contact/tags/github' },
-            { type: 'muted', text: 'clear          clear terminal' }
-        ],
-        about: () => [terminalData.site.title, { type: 'muted', text: terminalData.site.subtitle }, { type: 'muted', text: terminalData.site.description }],
-        posts: () =>
-            terminalData.posts.length
-                ? terminalData.posts.map((post) => ({
-                      type: 'link',
-                      label: post.title,
-                      href: post.href,
-                      detail: `${post.date}  ${post.description}`
-                  }))
-                : ['no posts found'],
-        projects: () =>
-            terminalData.projects.length
-                ? terminalData.projects.map((project) => ({
-                      type: 'link',
-                      label: project.title,
-                      href: project.href,
-                      detail: project.description
-                  }))
-                : ['no projects found'],
-        tags: () =>
-            terminalData.tags.length
-                ? terminalData.tags.map((tag) => ({
-                      type: 'link',
-                      label: `#${tag.name}`,
-                      href: tag.href,
-                      detail: `${tag.count} posts`
-                  }))
-                : ['no tags found'],
-        ls: () => ['about', 'posts', 'projects', 'tags', 'resume', 'contact'],
-        pwd: () => ['~/blog'],
-        whoami: () => ['guest']
+        help: {
+            aliases: ['?'],
+            description: 'show commands',
+            run: () => [
+                'available commands',
+                { type: 'muted', text: 'about                    show profile summary' },
+                { type: 'muted', text: 'posts [count]            list recent posts' },
+                { type: 'muted', text: 'projects [count]         list selected projects' },
+                { type: 'muted', text: 'tags | series            list indexes' },
+                { type: 'muted', text: 'search <keyword>         search posts, projects, pages, tags' },
+                { type: 'muted', text: 'open <target>            open a route, slug, title, tag, or series' },
+                { type: 'muted', text: 'random [post|project]    open a random item' },
+                { type: 'muted', text: 'theme dark|light|system  switch color mode' },
+                { type: 'muted', text: 'copy site|github|rss|contact|email' },
+                { type: 'muted', text: 'clear                    clear terminal' },
+                { type: 'muted', text: 'shortcuts: Tab complete, Up/Down history, Ctrl+L clear, Esc blur' }
+            ]
+        },
+        about: {
+            description: 'show profile summary',
+            run: () => [
+                terminalData.site.title,
+                { type: 'muted', text: terminalData.site.subtitle },
+                { type: 'muted', text: terminalData.site.description },
+                { type: 'link', label: 'about page', href: routes.about, detail: terminalData.site.website }
+            ]
+        },
+        posts: {
+            aliases: ['blog'],
+            description: 'list recent posts',
+            run: ({ args }) => listEntries(terminalData.posts, 'no posts found', Number.parseInt(args[0], 10) || 8)
+        },
+        projects: {
+            aliases: ['work'],
+            description: 'list selected projects',
+            run: ({ args }) => listEntries(terminalData.projects, 'no projects found', Number.parseInt(args[0], 10) || 8)
+        },
+        tags: {
+            description: 'list tags',
+            run: () => listEntries(terminalData.tags, 'no tags found', 16)
+        },
+        series: {
+            description: 'list series',
+            run: () => listEntries(terminalData.series, 'no series found', 16)
+        },
+        pages: {
+            description: 'list pages',
+            run: () => listEntries(terminalData.pages, 'no pages found', 16)
+        },
+        search: {
+            aliases: ['find', 'grep'],
+            description: 'search site content',
+            run: ({ args }) => {
+                const query = args.join(' ');
+                if (!query) return [{ type: 'muted', text: 'usage: search <keyword>' }];
+
+                const matches = findMatches(query, 10);
+                return matches.length ? matches.map(itemToEntry) : [{ type: 'muted', text: `no results for: ${query}` }];
+            }
+        },
+        open: {
+            aliases: ['go'],
+            description: 'open target',
+            run: ({ args }) => {
+                const target = resolveTarget(args);
+                if (!target) {
+                    const name = args.join(' ') || '<target>';
+                    return [{ type: 'muted', text: `unknown target: ${name}` }];
+                }
+
+                appendEntries([{ type: 'muted', text: `opening ${target.title ?? args.join(' ')}...` }]);
+                openHref(target.href);
+                return [];
+            }
+        },
+        random: {
+            aliases: ['shuffle'],
+            description: 'open random item',
+            run: ({ args }) => {
+                const scope = normalizeText(args[0] ?? 'post');
+                const pool = scope.startsWith('project') ? terminalData.projects : terminalData.posts;
+                if (!pool.length) return [{ type: 'muted', text: `no ${scope || 'post'} items found` }];
+                const item = pool[Math.floor(Math.random() * pool.length)];
+                appendEntries([{ type: 'muted', text: `opening ${item.title}...` }]);
+                openHref(item.href);
+                return [];
+            }
+        },
+        theme: {
+            description: 'switch color mode',
+            run: ({ args }) => {
+                const theme = normalizeText(args[0] ?? '');
+                if (!theme) {
+                    const activeTheme = window.blogTheme?.get?.() ?? 'system';
+                    return [{ type: 'muted', text: `current theme: ${activeTheme}` }];
+                }
+
+                if (!['dark', 'light', 'system'].includes(theme)) {
+                    return [{ type: 'muted', text: 'usage: theme dark|light|system' }];
+                }
+
+                window.blogTheme?.set?.(theme);
+                return [{ type: 'muted', text: `theme set to ${theme}` }];
+            }
+        },
+        copy: {
+            description: 'copy site values',
+            run: async ({ args }) => {
+                const key = normalizeText(args[0] ?? 'site');
+                const value = terminalData.copyTargets[key];
+                if (!value) {
+                    return [{ type: 'muted', text: `copy target not found: ${key}` }];
+                }
+
+                const copied = await copyText(value);
+                return [{ type: 'muted', text: copied ? `copied ${key}` : `copy failed, value: ${value}` }];
+            }
+        },
+        now: {
+            description: 'show current site status',
+            run: () => {
+                const formatter = new Intl.DateTimeFormat('zh-CN', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                });
+
+                return [
+                    formatter.format(new Date()),
+                    { type: 'muted', text: `${terminalData.posts.length} posts | ${terminalData.projects.length} projects | ${terminalData.tags.length} tags` },
+                    terminalData.posts[0] ? itemToEntry(terminalData.posts[0]) : { type: 'muted', text: 'no latest post' }
+                ];
+            }
+        },
+        ls: {
+            description: 'list routes',
+            run: () => [Object.keys(routes).join('  ')]
+        },
+        pwd: {
+            description: 'show current path',
+            run: () => ['~/blog']
+        },
+        whoami: {
+            description: 'show current user',
+            run: () => ['guest']
+        },
+        clear: {
+            aliases: ['cls'],
+            description: 'clear terminal',
+            run: () => {
+                output.replaceChildren();
+                return [];
+            }
+        }
     };
 
-    const routes = terminalData.routes;
+    const commands = new Map();
+    for (const [name, config] of Object.entries(commandHandlers)) {
+        commands.set(name, config);
+        for (const alias of config.aliases ?? []) {
+            commands.set(alias, config);
+        }
+    }
 
-    const runCommand = (rawCommand) => {
-        const command = rawCommand.trim().replace(/\s+/g, ' ');
-        const normalized = command.toLowerCase();
+    const getCompletionCandidates = () => {
+        const commandNames = Object.keys(commandHandlers);
+        const routeNames = Object.keys(routes).map((route) => `open ${route}`);
+        const copyNames = Object.keys(terminalData.copyTargets).map((target) => `copy ${target}`);
+        const themeNames = ['theme dark', 'theme light', 'theme system'];
+        const contentTargets = indexedItems.flatMap((item) => [`open ${item.id}`, `open ${item.title}`]);
+        return [...commandNames, ...routeNames, ...copyNames, ...themeNames, ...contentTargets];
+    };
+
+    const completeCommand = () => {
+        const value = compactCommand(commandInput.value);
+        if (!value) {
+            commandInput.value = 'help';
+            return;
+        }
+
+        const normalizedValue = normalizeText(value);
+        const matches = getCompletionCandidates()
+            .filter((candidate) => normalizeText(candidate).startsWith(normalizedValue))
+            .slice(0, 8);
+
+        if (matches.length === 1) {
+            commandInput.value = matches[0];
+            return;
+        }
+
+        if (matches.length > 1) {
+            appendEntries([{ type: 'muted', text: matches.join('  ') }]);
+        }
+    };
+
+    const runCommand = async (rawCommand) => {
+        const { command, name, args } = splitCommand(rawCommand);
         if (!command) return;
 
         appendPrompt(command);
 
-        if (normalized === 'clear') {
-            output.replaceChildren();
+        const handler = commands.get(name);
+        if (!handler) {
+            appendEntries([{ type: 'muted', text: `command not found: ${command}. try "help".` }]);
             return;
         }
 
-        if (normalized.startsWith('open ')) {
-            const target = normalized.slice(5);
-            const href = routes[target];
-
-            if (!href) {
-                appendEntries([{ type: 'muted', text: `unknown target: ${target}` }]);
-                return;
-            }
-
-            appendEntries([{ type: 'muted', text: `opening ${routeLabels[target] ?? target}...` }]);
-            if (/^https?:\/\//i.test(href)) {
-                window.open(href, '_blank', 'noopener,noreferrer');
-            } else {
-                window.location.href = href;
-            }
-            return;
-        }
-
-        const handler = commandHandlers[normalized];
-        appendEntries(handler ? handler() : [{ type: 'muted', text: `command not found: ${command}. try "help".` }]);
+        const result = await handler.run({ command, name, args });
+        if (result?.length) appendEntries(result);
     };
 
     const resetHistoryCursor = () => {
         historyIndex = commandHistory.length;
+    };
+
+    const setInputValue = (value) => {
+        commandInput.value = value;
+        window.requestAnimationFrame(() => commandInput.setSelectionRange(value.length, value.length));
     };
 
     form.addEventListener('submit', (event) => {
@@ -272,23 +593,41 @@ const terminalData = {
             resetHistoryCursor();
         }
 
-        runCommand(command);
+        void runCommand(command);
     });
 
     commandInput.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowUp') {
             event.preventDefault();
             historyIndex = Math.max(0, historyIndex - 1);
-            commandInput.value = commandHistory[historyIndex] ?? '';
+            setInputValue(commandHistory[historyIndex] ?? '');
             return;
         }
 
         if (event.key === 'ArrowDown') {
             event.preventDefault();
             historyIndex = Math.min(commandHistory.length, historyIndex + 1);
-            commandInput.value = commandHistory[historyIndex] ?? '';
+            setInputValue(commandHistory[historyIndex] ?? '');
+            return;
+        }
+
+        if (event.key === 'Tab') {
+            event.preventDefault();
+            completeCommand();
+            return;
+        }
+
+        if (event.key.toLowerCase() === 'l' && event.ctrlKey) {
+            event.preventDefault();
+            output.replaceChildren();
+            return;
+        }
+
+        if (event.key === 'Escape') {
+            commandInput.blur();
         }
     });
 
+    root.addEventListener('click', () => commandInput.focus());
     appendEntries([`${terminalData.site.title} shell ready.`, { type: 'muted', text: 'type "help" and press enter' }]);
 </script>
