@@ -139,6 +139,27 @@ html.dark {
         @apply bg-transparent p-0 font-normal text-[inherit];
     }
 
+    /* Shiki 双主题（defaultColor: false）：token 颜色随 html.dark 切换，背景统一用站点 bg-muted */
+    .astro-code {
+        background-color: var(--bg-muted);
+    }
+
+    .astro-code,
+    .astro-code span {
+        color: var(--shiki-light);
+        font-style: var(--shiki-light-font-style);
+        font-weight: var(--shiki-light-font-weight);
+        text-decoration: var(--shiki-light-text-decoration);
+    }
+
+    html.dark .astro-code,
+    html.dark .astro-code span {
+        color: var(--shiki-dark);
+        font-style: var(--shiki-dark-font-style);
+        font-weight: var(--shiki-dark-font-weight);
+        text-decoration: var(--shiki-dark-text-decoration);
+    }
+
     .prose .code-block {
         @apply relative pt-12;
     }
