@@ -24,7 +24,10 @@
             if (!code) return;
 
             pre.dataset.copyReady = 'true';
-            pre.classList.add('code-block');
+
+            // 包一层 wrapper：按钮定位在 wrapper 上，不随 pre 横向滚动跑偏
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-block';
 
             const button = document.createElement('button');
             button.type = 'button';
@@ -44,7 +47,8 @@
                 resetLabel(button, '复制');
             });
 
-            pre.appendChild(button);
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.append(pre, button);
         });
     }
 
