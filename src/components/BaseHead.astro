@@ -1,10 +1,10 @@
 ---
 import interWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import newsreaderWoff2 from '@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url';
-import { getImage } from 'astro:assets';
 import siteConfig from '../data/site-config';
 import type { ImageInput } from '../types';
-import { absoluteUrl, withBase } from '../utils/common-utils';
+import { withBase } from '../utils/common-utils';
+import { resolveShareImage } from '../utils/image-utils';
 
 import '../styles/global.css';
 
@@ -21,27 +21,7 @@ export type Props = {
 const { description = '', pageType = 'website', jsonLd, robots } = Astro.props;
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(' | ');
 const image = Astro.props.image ?? siteConfig.image;
-let resolvedImage: { src: string; alt?: string } | undefined;
-if (image?.src) {
-    if (typeof image.src === 'string') {
-        resolvedImage = {
-            src: absoluteUrl(image.src, Astro.site),
-            alt: image.alt
-        };
-    } else {
-        const optimizedImage = await getImage({
-            src: image.src as ImageMetadata,
-            width: 1200,
-            height: 630,
-            format: 'jpeg',
-            fit: 'cover'
-        });
-        resolvedImage = {
-            src: new URL(optimizedImage.src, Astro.site).toString(),
-            alt: image.alt
-        };
-    }
-}
+const resolvedImage = await resolveShareImage(image, Astro.site);
 const canonicalURL = new URL(Astro.props.canonical ?? Astro.request.url, Astro.site);
 
 /**

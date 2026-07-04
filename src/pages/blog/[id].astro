@@ -8,6 +8,8 @@ import PostPreview from '../../components/PostPreview.astro';
 import TocCard from '../../components/TocCard.astro';
 import { getPublishedBlogPosts, getReadingTime } from '../../utils/data-utils';
 import { absoluteUrl, slugify, withBase } from '../../utils/common-utils';
+import { resolveShareImage } from '../../utils/image-utils';
+import siteConfig from '../../data/site-config';
 
 export async function getStaticPaths() {
     const posts = await getPublishedBlogPosts();
@@ -31,13 +33,16 @@ const { Content, headings } = await render(post);
 const tableOfContents = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
 const readingTime = getReadingTime(post.body);
 const postUrl = absoluteUrl(`/blog/${post.id}/`, Astro.site);
+// 分享图优先级：seo.image > 文章封面 > 全站默认图；og:image 与 JSON-LD 使用同一张
+const shareImage = seo?.image ?? (cover ? { src: cover, alt: title } : undefined);
+const resolvedShareImage = await resolveShareImage(shareImage ?? siteConfig.image, Astro.site);
 const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: title,
     description: seo?.description ?? excerpt,
     url: postUrl,
-    image: absoluteUrl('/og-image.svg', Astro.site),
+    ...(resolvedShareImage && { image: resolvedShareImage.src }),
     datePublished: publishDate.toISOString(),
     dateModified: (updatedDate ?? publishDate).toISOString(),
     author: {
@@ -59,7 +64,7 @@ const articleJsonLd = {
 <BaseLayout
     title={seo?.title ?? title}
     description={seo?.description ?? excerpt}
-    image={seo?.image}
+    image={shareImage}
     pageType="article"
     showHeader={false}
     mainClass="mx-auto w-full max-w-6xl grow"
