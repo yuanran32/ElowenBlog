@@ -93,10 +93,10 @@ const articleJsonLd = {
                     </div>
                     {
                         (series || tags.length > 0) && (
-                            <div class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                                {series && <span>系列：{series}</span>}
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                {series && <span class="border-main rounded-full border px-2.5 py-0.5 text-xs">系列：{series}</span>}
                                 {tags.map((tag) => (
-                                    <a class="text-main hover:underline" href={withBase(`/tags/${slugify(tag)}/`)}>
+                                    <a class="border-main hover:bg-muted rounded-full border px-2.5 py-0.5 text-xs transition" href={withBase(`/tags/${slugify(tag)}/`)}>
                                         #{tag}
                                     </a>
                                 ))}

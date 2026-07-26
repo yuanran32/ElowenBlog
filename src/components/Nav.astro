@@ -10,7 +10,8 @@ const navLinks = siteConfig.headerNavLinks ?? [];
 ---
 
 <nav class="relative min-h-10 pt-4 pb-12 sm:min-h-14 sm:pb-24 md:pt-8" aria-label="主导航">
-    <div class="fixed inset-x-0 top-0 z-40 px-4 pt-4 md:px-8 md:pt-8">
+    <div class="menu-backdrop fixed inset-0 z-30 bg-black/30 invisible opacity-0 transition-opacity duration-200 md:hidden"></div>
+    <div class="nav-bar fixed inset-x-0 top-0 z-40 px-4 pt-4 md:px-8 md:pt-8 transition-[background-color,border-color,backdrop-filter] duration-200">
         {
             navLinks.length > 0 && (
                 <div class:list={['relative mx-auto w-full', containerClass]}>
@@ -48,6 +49,17 @@ const navLinks = siteConfig.headerNavLinks ?? [];
 
 <style>
     @reference "tailwindcss";
+
+    .nav-bar.is-scrolled {
+        background-color: color-mix(in srgb, var(--bg-main) 85%, transparent);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border-main);
+    }
+
+    .menu-backdrop.is-visible {
+        @apply visible opacity-100;
+    }
 
     @media (max-width: 767px) {
         .menu {
@@ -96,9 +108,20 @@ const navLinks = siteConfig.headerNavLinks ?? [];
 </style>
 
 <script>
+    function initNavScroll() {
+        const bar = document.querySelector<HTMLElement>('.nav-bar');
+        if (!bar) return;
+        function onScroll() {
+            bar!.classList.toggle('is-scrolled', window.scrollY > 10);
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+
     function menuToggle() {
         const menu = document.querySelector<HTMLElement>('.menu');
         const menuToggleBtn = document.querySelector<HTMLButtonElement>('.menu-toggle');
+        const backdrop = document.querySelector<HTMLElement>('.menu-backdrop');
         if (!menu || !menuToggleBtn) return;
         if (menuToggleBtn.dataset.menuReady === 'true') return;
 
@@ -109,6 +132,7 @@ const navLinks = siteConfig.headerNavLinks ?? [];
             menuToggleBtn!.setAttribute('aria-expanded', 'true');
             menuToggleBtn!.setAttribute('aria-label', '关闭菜单');
             menu!.classList.add('is-visible');
+            backdrop?.classList.add('is-visible');
         }
 
         function closeMenu() {
@@ -116,8 +140,11 @@ const navLinks = siteConfig.headerNavLinks ?? [];
             menuToggleBtn!.setAttribute('aria-expanded', 'false');
             menuToggleBtn!.setAttribute('aria-label', '打开菜单');
             menu!.classList.remove('is-visible');
+            backdrop?.classList.remove('is-visible');
             menuToggleBtn!.focus();
         }
+
+        backdrop?.addEventListener('click', closeMenu);
 
         menuToggleBtn.addEventListener('click', () => {
             const isMenuExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
@@ -150,5 +177,7 @@ const navLinks = siteConfig.headerNavLinks ?? [];
         });
     }
     menuToggle();
+    initNavScroll();
     document.addEventListener('astro:after-swap', menuToggle);
+    document.addEventListener('astro:after-swap', initNavScroll);
 </script>
